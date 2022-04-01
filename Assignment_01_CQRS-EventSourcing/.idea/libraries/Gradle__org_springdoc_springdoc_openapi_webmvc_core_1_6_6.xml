@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.springdoc:springdoc-openapi-webmvc-core:1.6.6">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springdoc/springdoc-openapi-webmvc-core/1.6.6/5dbdd074d5b62363aede4ed38bb449ecb15fa6ce/springdoc-openapi-webmvc-core-1.6.6.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springdoc/springdoc-openapi-webmvc-core/1.6.6/72d6298c9b0ae1f206f2062e73730e215b92bd8b/springdoc-openapi-webmvc-core-1.6.6-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
