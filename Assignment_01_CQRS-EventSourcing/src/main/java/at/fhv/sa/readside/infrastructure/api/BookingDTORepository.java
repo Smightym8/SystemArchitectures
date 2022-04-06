@@ -10,5 +10,7 @@ public interface BookingDTORepository {
 
     void remove(BookingDTO bookingDTO);
 
+    BookingDTO getByReservationNumber(String reservationNumber);
+
     List<BookingDTO> getByTimePeriod(LocalDate startDate, LocalDate endDate);
 }
