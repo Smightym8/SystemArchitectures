@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -25,11 +25,9 @@ public class BookingDTORepositoryImpl implements BookingDTORepository {
     }
 
     @Override
-    public BookingDTO getByReservationNumber(String reservationNumber) {
+    public Optional<BookingDTO> getByReservationNumber(String reservationNumber) {
         return bookings.stream()
-                .filter(booking -> booking.getReservationNumber().equals(reservationNumber)).findFirst().orElseThrow(
-                        () -> new NoSuchElementException("Booking with reservation number " + reservationNumber + " not found")
-                );
+                .filter(booking -> booking.getReservationNumber().equals(reservationNumber)).findFirst();
     }
 
     @Override

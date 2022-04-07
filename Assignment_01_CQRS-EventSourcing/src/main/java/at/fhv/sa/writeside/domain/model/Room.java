@@ -7,21 +7,11 @@ public class Room {
     private UUID id;
     private String roomNumber;
     private int capacity;
-    private boolean isBooked;
 
     public Room(UUID roomId, String roomNumber, int capacity) {
         this.id = roomId;
         this.roomNumber = roomNumber;
         this.capacity = capacity;
-        this.isBooked = false;
-    }
-
-    public void book() {
-        this.isBooked = true;
-    }
-
-    public void free() {
-        this.isBooked = false;
     }
 
     public UUID getRoomId() {
@@ -34,10 +24,6 @@ public class Room {
 
     public int getCapacity() {
         return capacity;
-    }
-
-    public boolean isBooked() {
-        return isBooked;
     }
 
     @Override

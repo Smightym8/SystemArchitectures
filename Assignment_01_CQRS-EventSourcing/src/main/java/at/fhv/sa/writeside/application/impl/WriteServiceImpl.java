@@ -37,13 +37,7 @@ public class WriteServiceImpl implements WriteService {
 
         roomNumbers.forEach(roomNumber -> {
             Room room = roomRepository.roomByNumber(roomNumber).orElseThrow(NoSuchElementException::new);
-
-            if(!room.isBooked()) {
-                rooms.add(room);
-                room.book();
-            } else {
-                throw new UnsupportedOperationException("This room is already booked!");
-            }
+            rooms.add(room);
         });
 
         Guest guest = new Guest(UUID.randomUUID(), guestFirstName, guestLastName);
@@ -71,7 +65,6 @@ public class WriteServiceImpl implements WriteService {
         Booking booking = bookingRepository.bookingByReservationNumber(reservationNumber).orElseThrow(NoSuchElementException::new);
 
         booking.getBookedRooms().forEach(room -> {
-            room.free();
             roomNumbers.add(room.getRoomNumber());
         });
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Component
 public class ProjectorImpl implements Projector {
@@ -22,39 +23,40 @@ public class ProjectorImpl implements Projector {
 
     @Override
     public void processBookingCreatedEvent(BookingCreated bookingCreated) {
-        List<FreeRoomDTO> bookedRooms = new ArrayList<>();
-        bookingCreated.getRoomNumbers().forEach(
-                // TODO: Get rooms by free status in booked period
-                roomNumber -> bookedRooms.add(freeRoomDTORepository.byRoomNumber(roomNumber))
+        List<FreeRoomDTO> freeRooms = freeRoomDTORepository.byTimePeriodAndCapacity(
+                bookingCreated.getStartDate(), bookingCreated.getEndDate(), 0
         );
 
         List<FreeRoomDTO> adjustedFreeRooms = new ArrayList<>();
 
-        for(FreeRoomDTO freeRoomDTO : bookedRooms) {
-           if(!freeRoomDTO.getFrom().isEqual(bookingCreated.getStartDate())) {
-               adjustedFreeRooms.add(
-                       FreeRoomDTO.builder()
-                               .withRoomNumber(freeRoomDTO.getRoomNumber())
-                               .withCapacity(freeRoomDTO.getCapacity())
-                               .withFrom(freeRoomDTO.getFrom())
-                               .withTo(bookingCreated.getStartDate().minusDays(1))
-                               .build()
-               );
-           }
+        for(FreeRoomDTO freeRoomDTO : freeRooms) {
+            if(bookingCreated.getRoomNumbers().contains(freeRoomDTO.getRoomNumber())) {
+                if (!freeRoomDTO.getFrom().isEqual(bookingCreated.getStartDate())) {
+                    adjustedFreeRooms.add(
+                            FreeRoomDTO.builder()
+                                    .withRoomNumber(freeRoomDTO.getRoomNumber())
+                                    .withCapacity(freeRoomDTO.getCapacity())
+                                    .withFrom(freeRoomDTO.getFrom())
+                                    .withTo(bookingCreated.getStartDate().minusDays(1))
+                                    .build()
+                    );
+                }
 
-           if(!freeRoomDTO.getTo().isEqual(bookingCreated.getEndDate())) {
-               adjustedFreeRooms.add(
-                       FreeRoomDTO.builder()
-                               .withRoomNumber(freeRoomDTO.getRoomNumber())
-                               .withCapacity(freeRoomDTO.getCapacity())
-                               .withFrom(bookingCreated.getEndDate().plusDays(1))
-                               .withTo(freeRoomDTO.getTo())
-                               .build()
-               );
-           }
+                if (!freeRoomDTO.getTo().isEqual(bookingCreated.getEndDate())) {
+                    adjustedFreeRooms.add(
+                            FreeRoomDTO.builder()
+                                    .withRoomNumber(freeRoomDTO.getRoomNumber())
+                                    .withCapacity(freeRoomDTO.getCapacity())
+                                    .withFrom(bookingCreated.getEndDate())
+                                    .withTo(freeRoomDTO.getTo())
+                                    .build()
+                    );
+                }
+
+                freeRoomDTORepository.remove(freeRoomDTO);
+            }
         }
 
-        bookedRooms.forEach(bookedRoom -> freeRoomDTORepository.remove(bookedRoom));
         adjustedFreeRooms.forEach(freeRoom -> freeRoomDTORepository.add(freeRoom));
 
         BookingDTO bookingDTO = BookingDTO.builder()
@@ -71,6 +73,50 @@ public class ProjectorImpl implements Projector {
 
     @Override
     public void processBookingCanceledEvent(BookingCanceled bookingCanceled) {
-        // TODO: Implement
+        BookingDTO bookingDTO = bookingDTORepository.getByReservationNumber(bookingCanceled.getReservationNumber()).orElseThrow(
+                () -> new NoSuchElementException("Booking with reservation number " + bookingCanceled.getReservationNumber() + " not found")
+        );
+
+        bookingDTORepository.remove(bookingDTO);
+
+        // TODO: Adapt FreeRooms
+        List<FreeRoomDTO> freeRoomDTOS = new ArrayList<>();
+        bookingDTO.getBookedRoomNumbers().forEach(bookedRoomNumber -> {
+            List<FreeRoomDTO> freeRoomsTemp = freeRoomDTORepository.byRoomNumber(bookedRoomNumber);
+            freeRoomDTOS.addAll(freeRoomsTemp);
+        });
+
+        List<FreeRoomDTO> adjustedRooms = new ArrayList<>();
+        List<FreeRoomDTO> roomEntriesToChange = new ArrayList<>();
+        List<FreeRoomDTO> roomEntriesToRemove = new ArrayList<>();
+        for(FreeRoomDTO freeRoomDTO : freeRoomDTOS) {
+            if(freeRoomDTO.getTo().isEqual(bookingDTO.getStartDate().minusDays(1))) {
+                roomEntriesToChange.add(freeRoomDTO);
+            }
+
+            if(freeRoomDTO.getFrom().isEqual(bookingDTO.getEndDate())) {
+                roomEntriesToRemove.add(freeRoomDTO);
+            }
+        }
+
+        for(int i = 0; i < roomEntriesToChange.size(); i++) {
+            FreeRoomDTO currentRoomToChange = roomEntriesToChange.get(i);
+            FreeRoomDTO matchingRoomToRemove = roomEntriesToRemove.get(i);
+
+            adjustedRooms.add(
+                    FreeRoomDTO.builder()
+                            .withRoomNumber(currentRoomToChange.getRoomNumber())
+                            .withFrom(currentRoomToChange.getFrom())
+                            .withTo(matchingRoomToRemove.getTo())
+                            .withCapacity(currentRoomToChange.getCapacity())
+                            .build()
+            );
+
+            // Remove old roomEntry
+            roomEntriesToRemove.add(currentRoomToChange);
+        }
+
+        roomEntriesToRemove.forEach(room -> freeRoomDTORepository.remove(room));
+        adjustedRooms.forEach(room -> freeRoomDTORepository.add(room));
     }
 }

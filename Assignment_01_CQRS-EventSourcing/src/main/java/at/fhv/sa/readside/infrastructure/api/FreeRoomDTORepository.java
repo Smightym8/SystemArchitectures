@@ -9,5 +9,8 @@ public interface FreeRoomDTORepository {
     void add(FreeRoomDTO freeRoom);
     void remove(FreeRoomDTO freeRoom);
     List<FreeRoomDTO> byTimePeriodAndCapacity(LocalDate from, LocalDate to, int capacity);
-    FreeRoomDTO byRoomNumber(String roomNumber);
+    List<FreeRoomDTO> byRoomNumber(String roomNumber);
+
+    // TODO: remove
+    List<FreeRoomDTO> getAllRooms();
 }

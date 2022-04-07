@@ -33,7 +33,7 @@ public class ReadRestController {
 
     @PostMapping(value = "/bookingcanceledevent", consumes = "application/json", produces = "application/json")
     public boolean bookingCanceledRest(@RequestBody BookingCanceled bookingCanceled) {
-        System.out.println("Received: " + bookingCanceled);
+        projector.processBookingCanceledEvent(bookingCanceled);
         return true;
     }
 
@@ -52,5 +52,10 @@ public class ReadRestController {
                 LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy")),
                 capacity
         );
+    }
+
+    @GetMapping(value = "/all")
+    public List<FreeRoomDTO> getAll() {
+        return freeRoomDTORepository.getAllRooms();
     }
 }

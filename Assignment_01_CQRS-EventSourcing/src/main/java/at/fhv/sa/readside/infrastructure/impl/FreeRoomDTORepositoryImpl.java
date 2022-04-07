@@ -47,9 +47,14 @@ public class FreeRoomDTORepositoryImpl implements FreeRoomDTORepository {
     }
 
     @Override
-    public FreeRoomDTO byRoomNumber(String roomNumber) {
-        return freeRooms.stream().filter(freeRoom -> freeRoom.getRoomNumber().equals(roomNumber)).findFirst().orElseThrow(
-                () -> new NoSuchElementException("Room with room number " + roomNumber + " not found")
-        );
+    public List<FreeRoomDTO> byRoomNumber(String roomNumber) {
+        return freeRooms.stream()
+                .filter(freeRoom -> freeRoom.getRoomNumber().equals(roomNumber))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<FreeRoomDTO> getAllRooms() {
+        return freeRooms;
     }
 }
