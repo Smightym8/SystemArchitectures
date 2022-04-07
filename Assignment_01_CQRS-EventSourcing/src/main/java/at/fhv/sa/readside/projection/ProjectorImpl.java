@@ -79,7 +79,6 @@ public class ProjectorImpl implements Projector {
 
         bookingDTORepository.remove(bookingDTO);
 
-        // TODO: Adapt FreeRooms
         List<FreeRoomDTO> freeRoomDTOS = new ArrayList<>();
         bookingDTO.getBookedRoomNumbers().forEach(bookedRoomNumber -> {
             List<FreeRoomDTO> freeRoomsTemp = freeRoomDTORepository.byRoomNumber(bookedRoomNumber);

@@ -53,9 +53,4 @@ public class ReadRestController {
                 capacity
         );
     }
-
-    @GetMapping(value = "/all")
-    public List<FreeRoomDTO> getAll() {
-        return freeRoomDTORepository.getAllRooms();
-    }
 }
