@@ -125,12 +125,7 @@ public class IntegrationTests {
         );
         projector.processBookingCreatedEvent(bookingCreated);
 
-        BookingCanceled bookingCanceled = new BookingCanceled(
-                reservationNumberExpected,
-                guestFirstNameExpected,
-                guestLastNameExpected,
-                roomNumbersExpected
-        );
+        BookingCanceled bookingCanceled = new BookingCanceled(reservationNumberExpected);
 
         // when
         projector.processBookingCanceledEvent(bookingCanceled);
@@ -159,12 +154,7 @@ public class IntegrationTests {
         );
         projector.processBookingCreatedEvent(bookingCreated);
 
-        BookingCanceled bookingCanceled = new BookingCanceled(
-                reservationNumberExpected,
-                guestFirstNameExpected,
-                guestLastNameExpected,
-                roomNumbersExpected
-        );
+        BookingCanceled bookingCanceled = new BookingCanceled(reservationNumberExpected);
 
         // when
         projector.processBookingCanceledEvent(bookingCanceled);

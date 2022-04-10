@@ -17,4 +17,12 @@ public class EventRepository {
         events.add(event);
         eventSubscribers.forEach(eventSubscriber -> eventSubscriber.getNotified(event));
     }
+
+    public void attach(EventSubscriber subscriber) {
+        eventSubscribers.add(subscriber);
+    }
+
+    public void detach(EventSubscriber subscriber) {
+        eventSubscribers.remove(subscriber);
+    }
 }

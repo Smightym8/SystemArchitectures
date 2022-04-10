@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Component
@@ -51,10 +50,5 @@ public class FreeRoomDTORepositoryImpl implements FreeRoomDTORepository {
         return freeRooms.stream()
                 .filter(freeRoom -> freeRoom.getRoomNumber().equals(roomNumber))
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<FreeRoomDTO> getAllRooms() {
-        return freeRooms;
     }
 }

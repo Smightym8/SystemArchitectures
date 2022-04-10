@@ -14,7 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @Component
 public class WriteServiceImpl implements WriteService {
@@ -70,12 +73,7 @@ public class WriteServiceImpl implements WriteService {
         bookingRepository.remove(booking);
 
         eventPublisherRepository.publishBookingCanceledEvent(
-                new BookingCanceled(
-                        booking.getReservationNumber(),
-                        booking.getGuest().getFirstName(),
-                        booking.getGuest().getLastName(),
-                        roomNumbers
-                )
+                new BookingCanceled(booking.getReservationNumber())
         );
 
         return true;
