@@ -21,7 +21,7 @@ public class EventRestController {
 
     @PostMapping(value = "/bookingcanceledevent", consumes = "application/json", produces = "application/json")
     public boolean bookingCanceledRest(@RequestBody BookingCanceled bookingCanceled) {
-        eventRepository.processEvent(bookingCanceled);
+        //eventRepository.processEvent(bookingCanceled);
         return true;
     }
 }

@@ -73,7 +73,12 @@ public class WriteServiceImpl implements WriteService {
         bookingRepository.remove(booking);
 
         eventPublisherRepository.publishBookingCanceledEvent(
-                new BookingCanceled(booking.getReservationNumber())
+                new BookingCanceled(
+                        booking.getReservationNumber(),
+                        booking.getGuest().getFirstName(),
+                        booking.getGuest().getLastName(),
+                        roomNumbers
+                )
         );
 
         return true;
