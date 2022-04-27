@@ -1,4 +1,4 @@
-package at.fhv.sysarch.lab2.homeautomation.devices;
+package at.fhv.sysarch.lab2.homeautomation.devices.sensors;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
@@ -7,6 +7,7 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import at.fhv.sysarch.lab2.homeautomation.devices.AirCondition;
 
 import java.util.Optional;
 
@@ -57,5 +58,4 @@ public class TemperatureSensor extends AbstractBehavior<TemperatureSensor.Temper
         getContext().getLog().info("TemperatureSensor actor {}-{} stopped", groupId, deviceId);
         return this;
     }
-
 }

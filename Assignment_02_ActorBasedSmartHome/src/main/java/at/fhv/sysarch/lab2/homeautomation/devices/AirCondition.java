@@ -93,13 +93,18 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
         getContext().getLog().info("Turning Aircondition to {}", r.value);
 
         if(r.value.get() == true) {
-            return Behaviors.receive(AirConditionCommand.class)
-                    .onMessage(EnrichedTemperature.class, this::onReadTemperature)
-                    .onMessage(PowerAirCondition.class, this::onPowerAirConditionOff)
-                    .onSignal(PostStop.class, signal -> onPostStop())
-                    .build();
+            return this.powerOn();
         }
         return this;
+    }
+
+    private Behavior<AirConditionCommand> powerOn() {
+        this.poweredOn = true;
+        return Behaviors.receive(AirConditionCommand.class)
+                .onMessage(EnrichedTemperature.class, this::onReadTemperature)
+                .onMessage(PowerAirCondition.class, this::onPowerAirConditionOff)
+                .onSignal(PostStop.class, signal -> onPostStop())
+                .build();
     }
 
     private Behavior<AirConditionCommand> powerOff() {
