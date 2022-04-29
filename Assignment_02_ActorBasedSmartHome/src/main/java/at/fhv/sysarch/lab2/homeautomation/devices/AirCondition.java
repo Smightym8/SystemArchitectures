@@ -68,7 +68,7 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     private Behavior<AirConditionCommand> onReadTemperature(EnrichedTemperature r) {
         getContext().getLog().info("Aircondition reading {}", r.value.get());
         // TODO: process temperature
-        if(r.value.get() >= 15) {
+        if(r.value.get() >= 15 && !this.active) {
             getContext().getLog().info("Aircondition actived");
             this.active = true;
         }

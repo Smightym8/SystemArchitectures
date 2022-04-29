@@ -11,27 +11,30 @@ import at.fhv.sysarch.lab2.homeautomation.devices.AirCondition;
 import at.fhv.sysarch.lab2.homeautomation.devices.BlindCondition;
 import at.fhv.sysarch.lab2.homeautomation.devices.sensors.TemperatureSensor;
 import at.fhv.sysarch.lab2.homeautomation.devices.sensors.WeatherSensor;
+import at.fhv.sysarch.lab2.homeautomation.environment.EnvironmentActor;
 
 import java.util.Optional;
 import java.util.Scanner;
 
 public class UI extends AbstractBehavior<Void> {
-
+    private ActorRef<EnvironmentActor.EnvironmentCommand> environment;
     private ActorRef<TemperatureSensor.TemperatureCommand> tempSensor;
     private ActorRef<WeatherSensor.WeatherCommand> weatherSensor;
     private ActorRef<AirCondition.AirConditionCommand> airCondition;
     private ActorRef<BlindCondition.BlindCommand> blindCondition;
 
     public static Behavior<Void> create(
+            ActorRef<EnvironmentActor.EnvironmentCommand> environment,
             ActorRef<TemperatureSensor.TemperatureCommand> tempSensor,
             ActorRef<AirCondition.AirConditionCommand> airCondition,
             ActorRef<WeatherSensor.WeatherCommand> weatherSensor,
             ActorRef<BlindCondition.BlindCommand> blindCondition) {
-        return Behaviors.setup(context -> new UI(context, tempSensor, airCondition, weatherSensor, blindCondition));
+        return Behaviors.setup(context -> new UI(context, environment, tempSensor, airCondition, weatherSensor, blindCondition));
     }
 
     private  UI(
             ActorContext<Void> context,
+            ActorRef<EnvironmentActor.EnvironmentCommand> environment,
             ActorRef<TemperatureSensor.TemperatureCommand> tempSensor,
             ActorRef<AirCondition.AirConditionCommand> airCondition,
             ActorRef<WeatherSensor.WeatherCommand> weatherSensor,
@@ -39,6 +42,7 @@ public class UI extends AbstractBehavior<Void> {
         super(context);
         // TODO: implement actor and behavior as needed
         // TODO: move UI initialization to appropriate place
+        this.environment = environment;
         this.airCondition = airCondition;
         this.tempSensor = tempSensor;
         this.blindCondition = blindCondition;

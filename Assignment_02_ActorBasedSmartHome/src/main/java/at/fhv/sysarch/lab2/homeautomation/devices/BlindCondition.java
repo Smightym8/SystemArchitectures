@@ -47,12 +47,12 @@ public class BlindCondition extends AbstractBehavior<BlindCondition.BlindCommand
 
         String weatherCondition = changedWeather.weatherCondition.get();
         // TODO: Check if movie is playing
-        if(weatherCondition.equals("sunny")) {
+        if(weatherCondition.equals("sunny") && this.isOpen) {
             getContext().getLog().info("Blinds closed");
             this.isOpen = false;
         } else {
             getContext().getLog().info("Blinds opened");
-            this.isOpen = false;
+            this.isOpen = true;
         }
 
         return this; // Same behavior

@@ -11,14 +11,15 @@ import at.fhv.sysarch.lab2.homeautomation.devices.AirCondition;
 import at.fhv.sysarch.lab2.homeautomation.devices.BlindCondition;
 import at.fhv.sysarch.lab2.homeautomation.devices.sensors.TemperatureSensor;
 import at.fhv.sysarch.lab2.homeautomation.devices.sensors.WeatherSensor;
+import at.fhv.sysarch.lab2.homeautomation.environment.EnvironmentActor;
 import at.fhv.sysarch.lab2.homeautomation.ui.UI;
 
-public class HomeAutomationController extends AbstractBehavior<Void>{
+public class HomeAutomationController extends AbstractBehavior<Void> {
+    private ActorRef<EnvironmentActor.EnvironmentCommand> environment;
     private ActorRef<TemperatureSensor.TemperatureCommand> tempSensor;
     private ActorRef<WeatherSensor.WeatherCommand> weatherSensor;
     private  ActorRef<AirCondition.AirConditionCommand> airCondition;
     private ActorRef<BlindCondition.BlindCommand> blindCondition;
-
 
     public static Behavior<Void> create() {
         return Behaviors.setup(HomeAutomationController::new);
@@ -31,7 +32,8 @@ public class HomeAutomationController extends AbstractBehavior<Void>{
         this.tempSensor = getContext().spawn(TemperatureSensor.create(this.airCondition, "1", "1"), "temperatureSensor");
         this.blindCondition = getContext().spawn(BlindCondition.create("3", "1"), "BlindCondition");
         this.weatherSensor = getContext().spawn(WeatherSensor.create(this.blindCondition, "1", "1"), "WeatherSensor");
-        ActorRef<Void> ui = getContext().spawn(UI.create(this.tempSensor, this.airCondition, this.weatherSensor, this.blindCondition), "UI");
+        this.environment = getContext().spawn(EnvironmentActor.create(tempSensor, weatherSensor), "Environment");
+        ActorRef<Void> ui = getContext().spawn(UI.create(this.environment, this.tempSensor, this.airCondition, this.weatherSensor, this.blindCondition), "UI");
         getContext().getLog().info("HomeAutomation Application started");
     }
 
