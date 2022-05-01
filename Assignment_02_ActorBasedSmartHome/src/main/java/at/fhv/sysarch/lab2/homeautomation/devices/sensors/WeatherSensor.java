@@ -8,6 +8,7 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab2.homeautomation.devices.BlindCondition;
+import at.fhv.sysarch.lab2.homeautomation.environment.EnvironmentActor;
 
 import java.util.Optional;
 
@@ -15,9 +16,9 @@ public class WeatherSensor extends AbstractBehavior<WeatherSensor.WeatherCommand
     public interface WeatherCommand {}
 
     public static final class ReadWeatherCondition implements WeatherCommand {
-        final Optional<String> weatherCondition;
+        final Optional<EnvironmentActor.WeatherChanger.Weather> weatherCondition;
 
-        public ReadWeatherCondition(Optional<String> weatherCondition) {
+        public ReadWeatherCondition(Optional<EnvironmentActor.WeatherChanger.Weather> weatherCondition) {
             this.weatherCondition = weatherCondition;
         }
     }

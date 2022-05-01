@@ -4,7 +4,6 @@ import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.PostStop;
 import akka.actor.typed.javadsl.*;
-import at.fhv.sysarch.lab2.homeautomation.devices.AirCondition;
 import at.fhv.sysarch.lab2.homeautomation.devices.sensors.TemperatureSensor;
 import at.fhv.sysarch.lab2.homeautomation.devices.sensors.WeatherSensor;
 
@@ -26,15 +25,21 @@ public class EnvironmentActor extends AbstractBehavior<EnvironmentActor.Environm
     }
 
     public static final class WeatherChanger implements EnvironmentCommand {
-        Optional<Boolean> isSunny;
+        Optional<Weather> currentWeater;
 
-        public WeatherChanger(Optional<Boolean> isSunny) {
-            this.isSunny = isSunny;
+        public enum Weather {
+            SUNNY,
+            RAINY,
+            FOGGY
+        }
+
+        public WeatherChanger(Optional<Weather> weather) {
+            this.currentWeater = weather;
         }
     }
 
     private double temperature = 10;
-    private boolean isSunny = false;
+    private WeatherChanger.Weather weather = WeatherChanger.Weather.SUNNY;
     private final TimerScheduler<EnvironmentCommand> temperatureTimerScheduler;
     private final TimerScheduler<EnvironmentCommand> weatherTimerScheduler;
 
@@ -58,7 +63,7 @@ public class EnvironmentActor extends AbstractBehavior<EnvironmentActor.Environm
         this.temperatureTimerScheduler = tempTimer;
         this.weatherTimerScheduler = weatherTimer;
         this.temperatureTimerScheduler.startTimerAtFixedRate(new TemperatureChanger(Optional.of(temperature)), Duration.ofSeconds(5));
-        this.weatherTimerScheduler.startTimerAtFixedRate(new WeatherChanger(Optional.of(isSunny)), Duration.ofSeconds(20));
+        this.weatherTimerScheduler.startTimerAtFixedRate(new WeatherChanger(Optional.of(weather)), Duration.ofSeconds(20));
     }
 
     @Override
@@ -78,12 +83,19 @@ public class EnvironmentActor extends AbstractBehavior<EnvironmentActor.Environm
                 new TemperatureSensor.ReadTemperature(Optional.of(temperature))
         );
 
-        Random r = new Random();
+        Random random = new Random();
 
-        if(isSunny) {
-            temperature = 15 + (35 - 15) * r.nextDouble();
-        } else {
-            temperature = 0 + 15 * r.nextDouble();
+        switch (weather) {
+            case SUNNY:
+                temperature = 21 + (35 - 20) * random.nextDouble();
+                break;
+            case FOGGY:
+                temperature = 0 + 10 * random.nextDouble();
+                break;
+            case RAINY:
+                temperature = 11 + (20 - 10) * random.nextDouble();
+                break;
+            // default: temperature = 0;
         }
 
         return this;
@@ -91,24 +103,12 @@ public class EnvironmentActor extends AbstractBehavior<EnvironmentActor.Environm
 
     private Behavior<EnvironmentCommand> onWeatherChange(WeatherChanger w) {
         // Tell the WeatherSensor that the weather changed
-        if(isSunny) {
-            getContext().getLog().info("Weather changed to sunny");
-
-            weatherSensor.tell(
-                    new WeatherSensor.ReadWeatherCondition(Optional.of("sunny"))
-            );
-        } else {
-            getContext().getLog().info("Weather changed to not sunny");
-            weatherSensor.tell(
-                    new WeatherSensor.ReadWeatherCondition(Optional.of("foggy"))
-            );
-        }
-
-
+        getContext().getLog().info("Weather changed to " + weather.toString());
+        weatherSensor.tell(new WeatherSensor.ReadWeatherCondition(Optional.of(weather)));
 
         // Switch random between sunny and not sunny
         Random random = new Random();
-        isSunny = random.nextBoolean();
+        weather = WeatherChanger.Weather.values()[(random.nextInt(2))];
 
         return this;
     }

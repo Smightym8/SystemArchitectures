@@ -82,7 +82,7 @@ public class UI extends AbstractBehavior<Void> {
             }
 
             if(command[0].equals("w")) {
-                this.weatherSensor.tell(new WeatherSensor.ReadWeatherCondition(Optional.of(command[1])));
+                this.weatherSensor.tell(new WeatherSensor.ReadWeatherCondition(Optional.of(EnvironmentActor.WeatherChanger.Weather.valueOf(command[1]))));
             }
 
             // TODO: process Input
