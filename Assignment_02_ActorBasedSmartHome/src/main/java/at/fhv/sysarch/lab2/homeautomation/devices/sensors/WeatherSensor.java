@@ -9,6 +9,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab2.homeautomation.devices.BlindCondition;
 import at.fhv.sysarch.lab2.homeautomation.environment.EnvironmentActor;
+import at.fhv.sysarch.lab2.homeautomation.environment.Weather;
 
 import java.util.Optional;
 
@@ -16,9 +17,9 @@ public class WeatherSensor extends AbstractBehavior<WeatherSensor.WeatherCommand
     public interface WeatherCommand {}
 
     public static final class ReadWeatherCondition implements WeatherCommand {
-        final Optional<EnvironmentActor.WeatherChanger.Weather> weatherCondition;
+        final Optional<Weather> weatherCondition;
 
-        public ReadWeatherCondition(Optional<EnvironmentActor.WeatherChanger.Weather> weatherCondition) {
+        public ReadWeatherCondition(Optional<Weather> weatherCondition) {
             this.weatherCondition = weatherCondition;
         }
     }
@@ -49,7 +50,7 @@ public class WeatherSensor extends AbstractBehavior<WeatherSensor.WeatherCommand
     }
 
     private Behavior<WeatherCommand> onReadWeatherCondition(ReadWeatherCondition weatherCondition) {
-        getContext().getLog().info("WeatherSensor received {}", weatherCondition.weatherCondition.get());
+        getContext().getLog().info("WeatherSensor received {}", weatherCondition.weatherCondition.get().getFriendlyName());
         // Tell blinds and return same behaviour
         blindCondition.tell(new BlindCondition.ChangedWeather(weatherCondition.weatherCondition));
         return this;

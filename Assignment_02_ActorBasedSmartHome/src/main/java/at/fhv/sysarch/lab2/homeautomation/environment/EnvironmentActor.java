@@ -27,19 +27,13 @@ public class EnvironmentActor extends AbstractBehavior<EnvironmentActor.Environm
     public static final class WeatherChanger implements EnvironmentCommand {
         Optional<Weather> currentWeater;
 
-        public enum Weather {
-            SUNNY,
-            RAINY,
-            FOGGY
-        }
-
         public WeatherChanger(Optional<Weather> weather) {
             this.currentWeater = weather;
         }
     }
 
     private double temperature = 10;
-    private WeatherChanger.Weather weather = WeatherChanger.Weather.SUNNY;
+    private Weather weather = Weather.SUNNY;
     private final TimerScheduler<EnvironmentCommand> temperatureTimerScheduler;
     private final TimerScheduler<EnvironmentCommand> weatherTimerScheduler;
 
@@ -103,12 +97,12 @@ public class EnvironmentActor extends AbstractBehavior<EnvironmentActor.Environm
 
     private Behavior<EnvironmentCommand> onWeatherChange(WeatherChanger w) {
         // Tell the WeatherSensor that the weather changed
-        getContext().getLog().info("Weather changed to " + weather.toString());
+        getContext().getLog().info("Weather changed to " + weather.getFriendlyName());
         weatherSensor.tell(new WeatherSensor.ReadWeatherCondition(Optional.of(weather)));
 
         // Switch random between sunny and not sunny
         Random random = new Random();
-        weather = WeatherChanger.Weather.values()[(random.nextInt(2))];
+        weather = Weather.values()[(random.nextInt(2))];
 
         return this;
     }

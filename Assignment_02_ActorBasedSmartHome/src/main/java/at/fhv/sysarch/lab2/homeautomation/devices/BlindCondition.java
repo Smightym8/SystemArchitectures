@@ -7,6 +7,7 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab2.homeautomation.environment.EnvironmentActor;
+import at.fhv.sysarch.lab2.homeautomation.environment.Weather;
 
 import java.util.Optional;
 
@@ -14,9 +15,9 @@ public class BlindCondition extends AbstractBehavior<BlindCondition.BlindCommand
     public interface BlindCommand {}
 
     public static final class ChangedWeather implements BlindCommand {
-        Optional<EnvironmentActor.WeatherChanger.Weather> weatherCondition;
+        Optional<Weather> weatherCondition;
 
-        public ChangedWeather(Optional<EnvironmentActor.WeatherChanger.Weather> weatherCondition) {
+        public ChangedWeather(Optional<Weather> weatherCondition) {
             this.weatherCondition = weatherCondition;
         }
     }
@@ -44,11 +45,11 @@ public class BlindCondition extends AbstractBehavior<BlindCondition.BlindCommand
     }
 
     private Behavior<BlindCommand> onReadWeatherCondition(ChangedWeather changedWeather) {
-        getContext().getLog().info("Blind reading {}", changedWeather.weatherCondition.get());
+        getContext().getLog().info("Blind reading {}", changedWeather.weatherCondition.get().getFriendlyName());
 
-        EnvironmentActor.WeatherChanger.Weather weatherCondition = changedWeather.weatherCondition.get();
+        Weather weatherCondition = changedWeather.weatherCondition.get();
         // TODO: Check if movie is playing
-        if(weatherCondition.equals(EnvironmentActor.WeatherChanger.Weather.SUNNY) && this.isOpen) {
+        if(weatherCondition.equals(Weather.SUNNY) && this.isOpen) {
             getContext().getLog().info("Blinds closed");
             this.isOpen = false;
         } else {

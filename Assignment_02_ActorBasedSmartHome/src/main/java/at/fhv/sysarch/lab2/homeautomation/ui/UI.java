@@ -12,6 +12,7 @@ import at.fhv.sysarch.lab2.homeautomation.devices.BlindCondition;
 import at.fhv.sysarch.lab2.homeautomation.devices.sensors.TemperatureSensor;
 import at.fhv.sysarch.lab2.homeautomation.devices.sensors.WeatherSensor;
 import at.fhv.sysarch.lab2.homeautomation.environment.EnvironmentActor;
+import at.fhv.sysarch.lab2.homeautomation.environment.Weather;
 
 import java.util.Optional;
 import java.util.Scanner;
@@ -82,7 +83,7 @@ public class UI extends AbstractBehavior<Void> {
             }
 
             if(command[0].equals("w")) {
-                this.weatherSensor.tell(new WeatherSensor.ReadWeatherCondition(Optional.of(EnvironmentActor.WeatherChanger.Weather.valueOf(command[1]))));
+                this.weatherSensor.tell(new WeatherSensor.ReadWeatherCondition(Optional.of(Weather.valueOf(command[1]))));
             }
 
             // TODO: process Input
