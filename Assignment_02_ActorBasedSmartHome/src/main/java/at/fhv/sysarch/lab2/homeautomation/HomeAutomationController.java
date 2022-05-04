@@ -9,6 +9,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab2.homeautomation.devices.AirCondition;
 import at.fhv.sysarch.lab2.homeautomation.devices.BlindCondition;
+import at.fhv.sysarch.lab2.homeautomation.devices.MediaStation;
 import at.fhv.sysarch.lab2.homeautomation.devices.sensors.TemperatureSensor;
 import at.fhv.sysarch.lab2.homeautomation.devices.sensors.WeatherSensor;
 import at.fhv.sysarch.lab2.homeautomation.environment.EnvironmentActor;
@@ -20,6 +21,7 @@ public class HomeAutomationController extends AbstractBehavior<Void> {
     private ActorRef<WeatherSensor.WeatherCommand> weatherSensor;
     private  ActorRef<AirCondition.AirConditionCommand> airCondition;
     private ActorRef<BlindCondition.BlindCommand> blindCondition;
+    private ActorRef<MediaStation.MediaStationCommand> mediaStationCondition;
 
     public static Behavior<Void> create() {
         return Behaviors.setup(HomeAutomationController::new);
@@ -29,11 +31,13 @@ public class HomeAutomationController extends AbstractBehavior<Void> {
         super(context);
         // TODO: consider guardians and hierarchies. Who should create and communicate with which Actors?
         this.airCondition = getContext().spawn(AirCondition.create("2", "1"), "AirCondition");
-        this.tempSensor = getContext().spawn(TemperatureSensor.create(this.airCondition, "1", "1"), "temperatureSensor");
-        this.blindCondition = getContext().spawn(BlindCondition.create("3", "1"), "BlindCondition");
-        this.weatherSensor = getContext().spawn(WeatherSensor.create(this.blindCondition, "1", "1"), "WeatherSensor");
+        this.tempSensor = getContext().spawn(TemperatureSensor.create(this.airCondition, "2", "2"), "temperatureSensor");
+        this.blindCondition = getContext().spawn(BlindCondition.create("1", "1"), "BlindCondition");
+        this.mediaStationCondition = getContext().spawn(MediaStation.create(this.blindCondition, "1", "2"), "MediaStation");
+        this.weatherSensor = getContext().spawn(WeatherSensor.create(this.blindCondition, "1", "3"), "WeatherSensor");
         this.environment = getContext().spawn(EnvironmentActor.create(tempSensor, weatherSensor), "Environment");
-        ActorRef<Void> ui = getContext().spawn(UI.create(this.environment, this.tempSensor, this.airCondition, this.weatherSensor, this.blindCondition), "UI");
+        ActorRef<Void> ui = getContext().spawn(UI.create(this.environment, this.tempSensor, this.airCondition,
+                this.weatherSensor, this.blindCondition, this.mediaStationCondition), "UI");
         getContext().getLog().info("HomeAutomation Application started");
     }
 

@@ -45,15 +45,16 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     private boolean active = false;
     private boolean poweredOn = true;
 
+    public static Behavior<AirConditionCommand> create(String groupId, String deviceId) {
+        return Behaviors.setup(context -> new AirCondition(context, groupId, deviceId));
+    }
+
+    // TODO: test if private constructor works
     public AirCondition(ActorContext<AirConditionCommand> context, String groupId, String deviceId) {
         super(context);
         this.groupId = groupId;
         this.deviceId = deviceId;
         getContext().getLog().info("AirCondition started");
-    }
-
-    public static Behavior<AirConditionCommand> create(String groupId, String deviceId) {
-        return Behaviors.setup(context -> new AirCondition(context, groupId, deviceId));
     }
 
     @Override
@@ -67,8 +68,8 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
 
     private Behavior<AirConditionCommand> onReadTemperature(EnrichedTemperature r) {
         getContext().getLog().info("Aircondition reading {}", r.value.get());
-        // TODO: process temperature
-        if(r.value.get() >= 15 && !this.active) {
+
+        if(r.value.get() >= 20 && !this.active) {
             getContext().getLog().info("Aircondition actived");
             this.active = true;
         }

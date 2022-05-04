@@ -6,7 +6,6 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import at.fhv.sysarch.lab2.homeautomation.environment.EnvironmentActor;
 import at.fhv.sysarch.lab2.homeautomation.environment.Weather;
 
 import java.util.Optional;
@@ -22,9 +21,19 @@ public class BlindCondition extends AbstractBehavior<BlindCondition.BlindCommand
         }
     }
 
+    public static final class ChangedMoviePlaying implements BlindCommand {
+        Optional<Boolean> isPlaying;
+
+        public ChangedMoviePlaying(Optional<Boolean> isPlaying) {
+            this.isPlaying = isPlaying;
+        }
+    }
+
     private final String groupId;
     private final String deviceId;
     private boolean isOpen = true;
+    private boolean isMediaStationMoviePlaying = false;
+    private Weather currentWeather = Weather.RAINY;
 
     public static Behavior<BlindCommand> create(String groupId, String deviceId) {
         return Behaviors.setup(context -> new BlindCondition(context, groupId, deviceId));
@@ -40,6 +49,7 @@ public class BlindCondition extends AbstractBehavior<BlindCondition.BlindCommand
     public Receive<BlindCommand> createReceive() {
         return newReceiveBuilder()
                 .onMessage(ChangedWeather.class, this::onReadWeatherCondition)
+                .onMessage(ChangedMoviePlaying.class, this::onChangedMoviePlaying)
                 .onSignal(PostStop.class, signal -> onPostStop())
                 .build();
     }
@@ -47,17 +57,32 @@ public class BlindCondition extends AbstractBehavior<BlindCondition.BlindCommand
     private Behavior<BlindCommand> onReadWeatherCondition(ChangedWeather changedWeather) {
         getContext().getLog().info("Blind reading {}", changedWeather.weatherCondition.get().getFriendlyName());
 
-        Weather weatherCondition = changedWeather.weatherCondition.get();
-        // TODO: Check if movie is playing
-        if(weatherCondition.equals(Weather.SUNNY) && this.isOpen) {
-            getContext().getLog().info("Blinds closed");
-            this.isOpen = false;
-        } else {
-            getContext().getLog().info("Blinds opened");
-            this.isOpen = true;
-        }
+        this.currentWeather = changedWeather.weatherCondition.get();
+        changeBlindCondition();
 
         return this; // Same behavior
+    }
+
+    private Behavior<BlindCommand> onChangedMoviePlaying(ChangedMoviePlaying changedMoviePlaying){
+        getContext().getLog().info("Blind reading from MediaStation {}", changedMoviePlaying.isPlaying.get());
+
+        this.isMediaStationMoviePlaying = changedMoviePlaying.isPlaying.get();
+        changeBlindCondition();
+
+        return this;
+    }
+
+    private void changeBlindCondition() {
+        if(this.isMediaStationMoviePlaying == false && !this.currentWeather.equals(Weather.SUNNY)) {
+            getContext().getLog().info("Blinds opened");
+            this.isOpen = true;
+        } else if(this.isMediaStationMoviePlaying == false && this.currentWeather.equals(Weather.SUNNY)) {
+            getContext().getLog().info("Blinds closed");
+            this.isOpen = false;
+        } else if(this.isMediaStationMoviePlaying == true) {
+            getContext().getLog().info("Blinds closed");
+            this.isOpen = false;
+        }
     }
 
     private BlindCondition onPostStop() {
