@@ -83,16 +83,24 @@ public class UI extends AbstractBehavior<Void> {
             reader = scanner.nextLine();
             // TODO: change input handling
             String[] command = reader.split(" ");
-            if(command[0].equals("temp")) {
+            if(command[0].equals("settemp")) {
                 this.tempSensor.tell(new TemperatureSensor.ReadTemperature(Optional.of(Double.valueOf(command[1]))));
+            }
+
+            if(command[0].equals("reqtemp")) {
+                this.tempSensor.tell(new TemperatureSensor.RequestTemperature());
             }
 
             if(command[0].equals("acpower")) {
                 this.airCondition.tell(new AirCondition.PowerAirCondition(Optional.of(Boolean.valueOf(command[1]))));
             }
 
-            if(command[0].equals("weather")) {
+            if(command[0].equals("setweather")) {
                 this.weatherSensor.tell(new WeatherSensor.ReadWeatherCondition(Optional.of(Weather.valueOf(command[1]))));
+            }
+
+            if(command[0].equals("reqweather")) {
+                this.weatherSensor.tell(new WeatherSensor.RequestWeather());
             }
 
             if(command[0].equals("mediapower")) {

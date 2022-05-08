@@ -16,6 +16,10 @@ import java.util.Optional;
 public class WeatherSensor extends AbstractBehavior<WeatherSensor.WeatherCommand> {
     public interface WeatherCommand {}
 
+    public static final class RequestWeather implements WeatherCommand {
+        public RequestWeather(){}
+    }
+
     public static final class ReadWeatherCondition implements WeatherCommand {
         final Optional<Weather> weatherCondition;
 
@@ -24,18 +28,20 @@ public class WeatherSensor extends AbstractBehavior<WeatherSensor.WeatherCommand
         }
     }
 
-    public static Behavior<WeatherCommand> create(ActorRef<BlindCondition.BlindCommand> blindCondition, String groupId, String deviceId) {
-        return Behaviors.setup(context -> new WeatherSensor(context, blindCondition, groupId, deviceId));
-    }
-
     private final String groupId;
     private final String deviceId;
+    private ActorRef<EnvironmentActor.EnvironmentCommand> environment;
     private ActorRef<BlindCondition.BlindCommand> blindCondition;
 
-    public WeatherSensor(ActorContext<WeatherCommand> context, ActorRef<BlindCondition.BlindCommand> blindCondition, String groupId, String deviceId) {
+    public static Behavior<WeatherCommand> create(ActorRef<EnvironmentActor.EnvironmentCommand> environment, ActorRef<BlindCondition.BlindCommand> blindCondition, String groupId, String deviceId) {
+        return Behaviors.setup(context -> new WeatherSensor(context, environment, blindCondition, groupId, deviceId));
+    }
+
+    public WeatherSensor(ActorContext<WeatherCommand> context, ActorRef<EnvironmentActor.EnvironmentCommand> environment,  ActorRef<BlindCondition.BlindCommand> blindCondition, String groupId, String deviceId) {
         super(context);
         this.groupId = groupId;
         this.deviceId = deviceId;
+        this.environment = environment;
         this.blindCondition = blindCondition;
 
         getContext().getLog().info("WeatherSensor started");
@@ -44,9 +50,15 @@ public class WeatherSensor extends AbstractBehavior<WeatherSensor.WeatherCommand
     @Override
     public Receive<WeatherCommand> createReceive() {
         return newReceiveBuilder()
+                .onMessage(RequestWeather.class, this::onRequestWeather)
                 .onMessage(ReadWeatherCondition.class, this::onReadWeatherCondition)
                 .onSignal(PostStop.class, signal -> onPostStop())
                 .build();
+    }
+
+    private Behavior<WeatherCommand> onRequestWeather(RequestWeather rw) {
+        environment.tell(new EnvironmentActor.WeatherRequest(getContext().getSelf()));
+        return this;
     }
 
     private Behavior<WeatherCommand> onReadWeatherCondition(ReadWeatherCondition weatherCondition) {

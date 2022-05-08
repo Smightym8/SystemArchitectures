@@ -30,12 +30,13 @@ public class HomeAutomationController extends AbstractBehavior<Void> {
     private  HomeAutomationController(ActorContext<Void> context) {
         super(context);
         // TODO: consider guardians and hierarchies. Who should create and communicate with which Actors?
+        this.environment = getContext().spawn(EnvironmentActor.create(), "Environment");
         this.airCondition = getContext().spawn(AirCondition.create("2", "1"), "AirCondition");
-        this.tempSensor = getContext().spawn(TemperatureSensor.create(this.airCondition, "2", "2"), "temperatureSensor");
+        this.tempSensor = getContext().spawn(TemperatureSensor.create(this.environment, this.airCondition, "2", "2"), "temperatureSensor");
         this.blindCondition = getContext().spawn(BlindCondition.create("1", "1"), "BlindCondition");
         this.mediaStationCondition = getContext().spawn(MediaStation.create(this.blindCondition, "1", "2"), "MediaStation");
-        this.weatherSensor = getContext().spawn(WeatherSensor.create(this.blindCondition, "1", "3"), "WeatherSensor");
-        this.environment = getContext().spawn(EnvironmentActor.create(tempSensor, weatherSensor), "Environment");
+        this.weatherSensor = getContext().spawn(WeatherSensor.create(this.environment, this.blindCondition, "1", "3"), "WeatherSensor");
+
         ActorRef<Void> ui = getContext().spawn(UI.create(this.environment, this.tempSensor, this.airCondition,
                 this.weatherSensor, this.blindCondition, this.mediaStationCondition), "UI");
         getContext().getLog().info("HomeAutomation Application started");
