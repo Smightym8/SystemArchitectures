@@ -8,10 +8,9 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     public interface FridgeCommand{}
@@ -40,6 +39,20 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         }
     }
 
+    public static final class QueryOrderHistory implements FridgeCommand {
+        public QueryOrderHistory() {}
+    }
+
+    public static final class ConsumeProduct implements FridgeCommand {
+        Product product;
+        int quantity;
+
+        public ConsumeProduct(Product product, int quantity) {
+            this.product = product;
+            this.quantity = quantity;
+        }
+    }
+
     private ActorRef<SpaceSensor.SpaceSensorCommand> spaceSensor;
     private ActorRef<WeightSensor.WeightSensorCommand> weightSensor;
     private Map<Product, Integer> products;
@@ -60,9 +73,17 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     @Override
     public Receive<FridgeCommand> createReceive() {
         return newReceiveBuilder()
+                .onMessage(OrderProduct.class, this::onOrderProduct)
                 .onMessage(ReceiveApprovedOrder.class, this::onReceiveApprovedOrder)
                 .onMessage(ReceiveDeniedOrder.class, this::onReceiveDeniedOrder)
+                .onMessage(QueryOrderHistory.class, this::onQueryOrderHistory)
+                .onMessage(ConsumeProduct.class, this::onConsumeProduct)
                 .build();
+    }
+
+    private Behavior<FridgeCommand> onOrderProduct(OrderProduct op) {
+        getContext().spawn(OrderProcessor.create(op.order, getContext().getSelf(), spaceSensor, weightSensor), "OrderProcessor");
+        return this;
     }
 
     private Behavior<FridgeCommand> onReceiveApprovedOrder(ReceiveApprovedOrder rao) {
@@ -82,6 +103,37 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
 
     private Behavior<FridgeCommand> onReceiveDeniedOrder(ReceiveDeniedOrder rdo) {
         getContext().getLog().info("Order denied because {}", rdo.message);
+        return this;
+    }
+
+    private Behavior<FridgeCommand> onQueryOrderHistory(QueryOrderHistory qoh) {
+        if(orderHistory.size() > 0) {
+            getContext().getLog().info("Order History");
+
+            orderHistory.forEach((timestamp ,order) -> {
+                getContext().getLog().info("{}", timestamp);
+                getContext().getLog().info("-----------------------------");
+                getContext().getLog().info("{} of {}", order.getQuantity(), order.getProduct().getName());
+                getContext().getLog().info("-----------------------------");
+            });
+        } else {
+            getContext().getLog().info("The order history is empty");
+        }
+
+        return this;
+    }
+
+    private Behavior<FridgeCommand> onConsumeProduct(ConsumeProduct cp) {
+        getContext().getLog().info("Someone is consuming {} {}", cp.quantity, cp.product.getName());
+
+        if(products.containsKey(cp.product) && products.get(cp.product) > cp.quantity) {
+            // TODO: Remove quantity from product
+            // TODO: If quantity is zero order again
+            // TODO: Tell SpaceSensor
+            // TODO: Tell WeightSensor
+        } else {
+            getContext().getLog().info("There are not enough {} in the fridge", cp.product.getName());
+        }
 
         return this;
     }

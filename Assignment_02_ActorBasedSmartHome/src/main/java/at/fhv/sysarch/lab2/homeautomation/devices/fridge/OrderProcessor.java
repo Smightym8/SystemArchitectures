@@ -87,12 +87,14 @@ public class OrderProcessor extends AbstractBehavior<OrderProcessor.OrderProcess
 
     private Behavior<OrderProcessorCommand> processOrder() {
         if (freeSpace.isPresent() && freeWeight.isPresent()) {
-            if (freeSpace.get() - order.getQuantity() < 0) {
+            if (freeSpace.get() - (order.getProduct().getSpace() * order.getQuantity()) < 0) {
                 fridge.tell(new Fridge.ReceiveDeniedOrder("no space left for this order"));
-            } else if (freeWeight.get() - order.getProduct().getWeight() < 0) {
+            } else if (freeWeight.get() - (order.getProduct().getWeight() * order.getProduct().getWeight()) < 0) {
                 fridge.tell(new Fridge.ReceiveDeniedOrder("order has too much weight"));
             } else {
                 fridge.tell(new Fridge.ReceiveApprovedOrder(order));
+                spaceSensor.tell(new SpaceSensor.OnSuccessfulOrder(order));
+                weightSensor.tell(new WeightSensor.OnSuccessfulOrder(order));
             }
         } else {
             fridge.tell(new Fridge.ReceiveDeniedOrder("of internal error"));

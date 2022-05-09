@@ -18,6 +18,24 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
         }
     }
 
+    public static final class OnSuccessfulOrder implements WeightSensor.WeightSensorCommand {
+        Order order;
+
+        public OnSuccessfulOrder(Order order) {
+            this.order = order;
+        }
+    }
+
+    public static final class OnConsumeProduct implements WeightSensor.WeightSensorCommand {
+        Product product;
+        int quantity;
+
+        public OnConsumeProduct(Product product, int quantity) {
+            this.product = product;
+            this.quantity = quantity;
+        }
+    }
+
     private double maxWeight = 150;
     private double currentWeight = 0;
 
@@ -32,6 +50,8 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
     public Receive<WeightSensorCommand> createReceive() {
         return newReceiveBuilder()
                 .onMessage(RequestFreeWeight.class, this::onRequestFreeWeight)
+                .onMessage(OnSuccessfulOrder.class, this::onSuccessfulOrder)
+                .onMessage(OnConsumeProduct.class, this::onConsumeProduct)
                 .build();
     }
 
@@ -41,6 +61,26 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
         getContext().getLog().info("Free weight {}", freeWeight);
 
         rfw.replyTo.tell(new OrderProcessor.ReceiveFreeWeight(freeWeight));
+
+        return this;
+    }
+
+    private Behavior<WeightSensor.WeightSensorCommand> onSuccessfulOrder(OnSuccessfulOrder oso) {
+        getContext().getLog().info("Received new successful order, which uses {} space", oso.order.getProduct().getWeight());
+
+        currentWeight += oso.order.getProduct().getWeight() * oso.order.getQuantity();
+
+        getContext().getLog().info("New current weight {}", currentWeight);
+
+        return this;
+    }
+
+    private Behavior<WeightSensor.WeightSensorCommand> onConsumeProduct(OnConsumeProduct ocp) {
+        getContext().getLog().info("Someone is consuming {} {}", ocp.quantity, ocp.product.getName());
+
+        currentWeight -= ocp.product.getWeight() * ocp.quantity;
+
+        getContext().getLog().info("New current space {}", currentWeight);
 
         return this;
     }
