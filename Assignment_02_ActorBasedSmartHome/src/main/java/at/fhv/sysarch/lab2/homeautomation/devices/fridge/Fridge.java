@@ -43,6 +43,10 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         public QueryOrderHistory() {}
     }
 
+    public static final class QueryAvailableProducts implements FridgeCommand {
+        public QueryAvailableProducts() {}
+    }
+
     public static final class ConsumeProduct implements FridgeCommand {
         Product product;
         int quantity;
@@ -77,6 +81,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
                 .onMessage(ReceiveApprovedOrder.class, this::onReceiveApprovedOrder)
                 .onMessage(ReceiveDeniedOrder.class, this::onReceiveDeniedOrder)
                 .onMessage(QueryOrderHistory.class, this::onQueryOrderHistory)
+                .onMessage(QueryAvailableProducts.class, this::onQueryAvailableProducts)
                 .onMessage(ConsumeProduct.class, this::onConsumeProduct)
                 .build();
     }
@@ -123,14 +128,31 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         return this;
     }
 
+    private Behavior<FridgeCommand> onQueryAvailableProducts(QueryAvailableProducts qap) {
+        if(products.size() > 0) {
+            getContext().getLog().info("Available Products");
+
+            products.forEach((product, quantity) -> getContext().getLog().info("{} of {}", product, quantity));
+        } else {
+            getContext().getLog().info("No products available");
+        }
+
+        return this;
+    }
+
     private Behavior<FridgeCommand> onConsumeProduct(ConsumeProduct cp) {
         getContext().getLog().info("Someone is consuming {} {}", cp.quantity, cp.product.getName());
 
-        if(products.containsKey(cp.product) && products.get(cp.product) > cp.quantity) {
-            // TODO: Remove quantity from product
-            // TODO: If quantity is zero order again
-            // TODO: Tell SpaceSensor
-            // TODO: Tell WeightSensor
+        if (products.containsKey(cp.product) && products.get(cp.product) > cp.quantity) {
+            products.put(cp.product, products.get(cp.product) - 1);
+
+            if (products.get(cp.product) == 0) {
+                Order order = new Order(cp.product, 1);
+                getContext().getSelf().tell(new OrderProduct(order));
+            }
+
+            spaceSensor.tell(new SpaceSensor.OnConsumeProduct(cp.product, cp.quantity));
+            weightSensor.tell(new WeightSensor.OnConsumeProduct(cp.product, cp.quantity));
         } else {
             getContext().getLog().info("There are not enough {} in the fridge", cp.product.getName());
         }
