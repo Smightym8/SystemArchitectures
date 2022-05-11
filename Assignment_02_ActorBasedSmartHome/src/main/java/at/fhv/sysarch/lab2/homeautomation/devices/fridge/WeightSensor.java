@@ -66,7 +66,7 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
     }
 
     private Behavior<WeightSensor.WeightSensorCommand> onSuccessfulOrder(OnSuccessfulOrder oso) {
-        getContext().getLog().info("Received new successful order, which uses {} space", oso.order.getProduct().getWeight());
+        getContext().getLog().info("Received new successful order, which uses {} kg", oso.order.getProduct().getWeight());
 
         currentWeight += oso.order.getProduct().getWeight() * oso.order.getQuantity();
 
@@ -80,7 +80,7 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
 
         currentWeight -= ocp.product.getWeight() * ocp.quantity;
 
-        getContext().getLog().info("New current space {}", currentWeight);
+        getContext().getLog().info("New current weight {}", currentWeight);
 
         return this;
     }

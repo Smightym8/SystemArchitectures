@@ -63,9 +63,6 @@ public class OrderProcessor extends AbstractBehavior<OrderProcessor.OrderProcess
 
         spaceSensor.tell(new SpaceSensor.RequestFreeSpace(getContext().getSelf()));
         weightSensor.tell(new WeightSensor.RequestFreeWeight(getContext().getSelf()));
-
-        // TODO: we have to test this
-        processOrder();
     }
 
     @Override
@@ -78,10 +75,12 @@ public class OrderProcessor extends AbstractBehavior<OrderProcessor.OrderProcess
 
     private Behavior<OrderProcessorCommand> onReceiveFreeSpace(ReceiveFreeSpace rfs) {
         freeSpace = Optional.of(rfs.freeSpace);
+        processOrder();
         return this;
     }
     private Behavior<OrderProcessorCommand> onReceiveFreeWeight(ReceiveFreeWeight rfw) {
         freeWeight = Optional.of(rfw.freeWeight);
+        processOrder();
         return this;
     }
 
@@ -97,6 +96,7 @@ public class OrderProcessor extends AbstractBehavior<OrderProcessor.OrderProcess
                 weightSensor.tell(new WeightSensor.OnSuccessfulOrder(order));
             }
         } else {
+            // TODO: Figure out why this is always printed
             fridge.tell(new Fridge.ReceiveDeniedOrder("of internal error"));
         }
 

@@ -10,7 +10,6 @@ import akka.actor.typed.javadsl.Receive;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     public interface FridgeCommand{}

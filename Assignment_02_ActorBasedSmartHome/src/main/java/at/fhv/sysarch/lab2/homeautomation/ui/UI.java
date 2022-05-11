@@ -141,6 +141,9 @@ public class UI extends AbstractBehavior<Void> {
                 case "consume":
                     handleConsume(scanner);
                     break;
+                case "help":
+                    printUsage();
+                    break;
                 default:
                     System.out.println("Unknown command");
                     printUsage();
@@ -330,7 +333,7 @@ public class UI extends AbstractBehavior<Void> {
             int productNumber = Integer.parseInt(input) - 1;
             Product product = products.get(productNumber);
 
-            System.out.println("Enter a amount to order:");
+            System.out.println("Enter a amount to consume:");
             input = scanner.nextLine();
             int quantity = Integer.parseInt(input);
 
@@ -358,6 +361,7 @@ public class UI extends AbstractBehavior<Void> {
         System.out.println("printorders     -               Print the order history of the fridge");
         System.out.println("printproducts   -               Print all products that are in the fridge");
         System.out.println("consume         -               Consume a product");
+        System.out.println("help            -               Prints all available commands");
         System.out.println("exit            -               Exit the program");
     }
 }
