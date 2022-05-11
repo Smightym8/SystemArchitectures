@@ -10,6 +10,7 @@ import akka.actor.typed.javadsl.Receive;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     public interface FridgeCommand{}
@@ -43,8 +44,8 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     }
 
     // TODO: Change to stored or current products
-    public static final class QueryAvailableProducts implements FridgeCommand {
-        public QueryAvailableProducts() {}
+    public static final class QueryCurrentProducts implements FridgeCommand {
+        public QueryCurrentProducts() {}
     }
 
     public static final class ConsumeProduct implements FridgeCommand {
@@ -81,13 +82,13 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
                 .onMessage(ReceiveApprovedOrder.class, this::onReceiveApprovedOrder)
                 .onMessage(ReceiveDeniedOrder.class, this::onReceiveDeniedOrder)
                 .onMessage(QueryOrderHistory.class, this::onQueryOrderHistory)
-                .onMessage(QueryAvailableProducts.class, this::onQueryAvailableProducts)
+                .onMessage(QueryCurrentProducts.class, this::onQueryAvailableProducts)
                 .onMessage(ConsumeProduct.class, this::onConsumeProduct)
                 .build();
     }
 
     private Behavior<FridgeCommand> onOrderProduct(OrderProduct op) {
-        getContext().spawn(OrderProcessor.create(op.order, getContext().getSelf(), spaceSensor, weightSensor), "OrderProcessor");
+        getContext().spawn(OrderProcessor.create(op.order, getContext().getSelf(), spaceSensor, weightSensor), "OrderProcessor-" + UUID.randomUUID() );
         return this;
     }
 
@@ -128,11 +129,11 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         return this;
     }
 
-    private Behavior<FridgeCommand> onQueryAvailableProducts(QueryAvailableProducts qap) {
+    private Behavior<FridgeCommand> onQueryAvailableProducts(QueryCurrentProducts qap) {
         if(products.size() > 0) {
             getContext().getLog().info("Available Products");
 
-            products.forEach((product, quantity) -> getContext().getLog().info("{} of {}", product, quantity));
+            products.forEach((product, quantity) -> getContext().getLog().info("{} of {}", product.getName(), quantity));
         } else {
             getContext().getLog().info("No products available");
         }
@@ -143,7 +144,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     private Behavior<FridgeCommand> onConsumeProduct(ConsumeProduct cp) {
         getContext().getLog().info("Someone is consuming {} {}", cp.quantity, cp.product.getName());
 
-        if (products.containsKey(cp.product) && products.get(cp.product) > cp.quantity) {
+        if (products.containsKey(cp.product) && products.get(cp.product) >= cp.quantity) {
             products.put(cp.product, products.get(cp.product) - 1);
 
             if (products.get(cp.product) == 0) {

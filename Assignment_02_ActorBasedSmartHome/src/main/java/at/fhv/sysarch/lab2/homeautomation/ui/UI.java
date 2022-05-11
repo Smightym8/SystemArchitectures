@@ -18,7 +18,6 @@ import at.fhv.sysarch.lab2.homeautomation.devices.sensors.WeatherSensor;
 import at.fhv.sysarch.lab2.homeautomation.environment.EnvironmentActor;
 import at.fhv.sysarch.lab2.homeautomation.environment.Weather;
 
-import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -136,7 +135,7 @@ public class UI extends AbstractBehavior<Void> {
                     this.fridge.tell(new Fridge.QueryOrderHistory());
                     break;
                 case "printproducts":
-                    this.fridge.tell(new Fridge.QueryAvailableProducts());
+                    this.fridge.tell(new Fridge.QueryCurrentProducts());
                     break;
                 case "consume":
                     handleConsume(scanner);
@@ -283,7 +282,6 @@ public class UI extends AbstractBehavior<Void> {
     }
 
     private void handleOrder(Scanner scanner) {
-        // TODO: implement
         System.out.println("Available products");
         System.out.println("--------------------");
 
@@ -322,7 +320,7 @@ public class UI extends AbstractBehavior<Void> {
 
         int i = 1;
         for(Product p : products) {
-            System.out.println("(" + i + ") " + p.getName() + " - " + p.getWeight() + "kg" + " - " + p.getSpace() + " space");
+            System.out.println("(" + i + ") " + p.getName());
             i++;
         }
 
