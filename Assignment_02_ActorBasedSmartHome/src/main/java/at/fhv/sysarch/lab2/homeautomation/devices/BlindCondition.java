@@ -39,7 +39,7 @@ public class BlindCondition extends AbstractBehavior<BlindCondition.BlindCommand
         return Behaviors.setup(context -> new BlindCondition(context, groupId, deviceId));
     }
 
-    public BlindCondition(ActorContext<BlindCommand> context, String groupId, String deviceId) {
+    private BlindCondition(ActorContext<BlindCommand> context, String groupId, String deviceId) {
         super(context);
         this.groupId = groupId;
         this.deviceId = deviceId;

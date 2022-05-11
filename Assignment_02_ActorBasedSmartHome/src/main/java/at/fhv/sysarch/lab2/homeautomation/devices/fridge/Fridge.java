@@ -67,7 +67,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         return Behaviors.setup(Fridge::new);
     }
 
-    public Fridge(ActorContext<FridgeCommand> context) {
+    private Fridge(ActorContext<FridgeCommand> context) {
         super(context);
         this.spaceSensor = getContext().spawn(SpaceSensor.create(), "SpaceSensor");
         this.weightSensor = getContext().spawn(WeightSensor.create(), "WeightSensor");

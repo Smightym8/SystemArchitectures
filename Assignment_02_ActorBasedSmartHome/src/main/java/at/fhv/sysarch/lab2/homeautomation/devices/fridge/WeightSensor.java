@@ -42,7 +42,7 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
     public static Behavior<WeightSensor.WeightSensorCommand> create() {
         return Behaviors.setup(WeightSensor::new);
     }
-    public WeightSensor(ActorContext<WeightSensorCommand> context) {
+    private WeightSensor(ActorContext<WeightSensorCommand> context) {
         super(context);
     }
 

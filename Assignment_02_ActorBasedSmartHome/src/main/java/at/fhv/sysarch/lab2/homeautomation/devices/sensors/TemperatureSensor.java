@@ -30,16 +30,23 @@ public class TemperatureSensor extends AbstractBehavior<TemperatureSensor.Temper
         }
     }
 
-    public static Behavior<TemperatureCommand> create(ActorRef<EnvironmentActor.EnvironmentCommand> environment, ActorRef<AirCondition.AirConditionCommand> airCondition, String groupId, String deviceId) {
-        return Behaviors.setup(context -> new TemperatureSensor(context, environment, airCondition, groupId, deviceId));
-    }
 
     private final String groupId;
     private final String deviceId;
     private ActorRef<EnvironmentActor.EnvironmentCommand> environment;
     private ActorRef<AirCondition.AirConditionCommand> airCondition;
 
-    public TemperatureSensor(ActorContext<TemperatureCommand> context, ActorRef<EnvironmentActor.EnvironmentCommand> environment, ActorRef<AirCondition.AirConditionCommand> airCondition, String groupId, String deviceId) {
+    public static Behavior<TemperatureCommand> create(ActorRef<EnvironmentActor.EnvironmentCommand> environment, ActorRef<AirCondition.AirConditionCommand> airCondition, String groupId, String deviceId) {
+        return Behaviors.setup(context -> new TemperatureSensor(context, environment, airCondition, groupId, deviceId));
+    }
+
+    private TemperatureSensor(
+            ActorContext<TemperatureCommand> context,
+            ActorRef<EnvironmentActor.EnvironmentCommand> environment,
+            ActorRef<AirCondition.AirConditionCommand> airCondition,
+            String groupId,
+            String deviceId
+    ) {
         super(context);
         this.environment = environment;
         this.airCondition = airCondition;

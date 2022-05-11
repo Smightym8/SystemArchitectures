@@ -50,7 +50,7 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     }
 
     // TODO: test if private constructor works
-    public AirCondition(ActorContext<AirConditionCommand> context, String groupId, String deviceId) {
+    private AirCondition(ActorContext<AirConditionCommand> context, String groupId, String deviceId) {
         super(context);
         this.groupId = groupId;
         this.deviceId = deviceId;

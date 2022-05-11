@@ -46,7 +46,7 @@ public class OrderProcessor extends AbstractBehavior<OrderProcessor.OrderProcess
         return Behaviors.setup(context -> new OrderProcessor(context, order, fridge, spaceSensor, weightSensor));
     }
 
-    public OrderProcessor(
+    private OrderProcessor(
             ActorContext<OrderProcessorCommand> context,
             Order order,
             ActorRef<Fridge.FridgeCommand> fridge,

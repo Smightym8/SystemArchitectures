@@ -39,7 +39,7 @@ public class MediaStation extends AbstractBehavior<MediaStation.MediaStationComm
         return Behaviors.setup(context -> new MediaStation(context, blindCondition, groupId, deviceId));
     }
 
-    public MediaStation(ActorContext<MediaStationCommand> context, ActorRef<BlindCondition.BlindCommand> blindCondition, String groupId, String deviceId) {
+    private MediaStation(ActorContext<MediaStationCommand> context, ActorRef<BlindCondition.BlindCommand> blindCondition, String groupId, String deviceId) {
         super(context);
         this.blindCondition = blindCondition;
         this.groupId = groupId;

@@ -42,7 +42,7 @@ public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand
         return Behaviors.setup(SpaceSensor::new);
     }
 
-    public SpaceSensor(ActorContext<SpaceSensorCommand> context) {
+    private SpaceSensor(ActorContext<SpaceSensorCommand> context) {
         super(context);
     }
 

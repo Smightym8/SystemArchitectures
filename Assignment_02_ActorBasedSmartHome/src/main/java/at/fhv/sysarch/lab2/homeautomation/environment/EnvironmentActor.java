@@ -57,7 +57,7 @@ public class EnvironmentActor extends AbstractBehavior<EnvironmentActor.Environm
         return Behaviors.setup(context -> Behaviors.withTimers(timers -> new EnvironmentActor(context, timers, timers)));
     }
 
-    public EnvironmentActor(
+    private EnvironmentActor(
             ActorContext<EnvironmentCommand> context,
             TimerScheduler<EnvironmentCommand> tempTimer,
             TimerScheduler<EnvironmentCommand> weatherTimer
