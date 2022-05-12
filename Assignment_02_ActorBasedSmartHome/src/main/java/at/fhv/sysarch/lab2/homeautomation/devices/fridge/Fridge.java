@@ -2,10 +2,12 @@ package at.fhv.sysarch.lab2.homeautomation.devices.fridge;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
+import akka.actor.typed.PostStop;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import at.fhv.sysarch.lab2.homeautomation.devices.Blind;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -58,19 +60,23 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         }
     }
 
+    private final String groupId;
+    private final String deviceId;
     private ActorRef<SpaceSensor.SpaceSensorCommand> spaceSensor;
     private ActorRef<WeightSensor.WeightSensorCommand> weightSensor;
     private Map<Product, Integer> products;
     private Map<LocalDateTime, Order> orderHistory;
 
-    public static Behavior<Fridge.FridgeCommand> create() {
-        return Behaviors.setup(Fridge::new);
+    public static Behavior<Fridge.FridgeCommand> create(String groupId, String deviceId) {
+        return Behaviors.setup(context -> new Fridge(context, groupId, deviceId));
     }
 
-    private Fridge(ActorContext<FridgeCommand> context) {
+    private Fridge(ActorContext<FridgeCommand> context, String groupId, String deviceId) {
         super(context);
-        this.spaceSensor = getContext().spawn(SpaceSensor.create(), "SpaceSensor");
-        this.weightSensor = getContext().spawn(WeightSensor.create(), "WeightSensor");
+        this.groupId = groupId;
+        this.deviceId = deviceId;
+        this.spaceSensor = getContext().spawn(SpaceSensor.create("3", "2"), "SpaceSensor");
+        this.weightSensor = getContext().spawn(WeightSensor.create("3", "3"), "WeightSensor");
         this.products = new HashMap<>();
         this.orderHistory = new HashMap<>();
     }
@@ -84,11 +90,13 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
                 .onMessage(QueryOrderHistory.class, this::onQueryOrderHistory)
                 .onMessage(QueryCurrentProducts.class, this::onQueryAvailableProducts)
                 .onMessage(ConsumeProduct.class, this::onConsumeProduct)
+                .onSignal(PostStop.class, signal -> onPostStop())
                 .build();
     }
 
     private Behavior<FridgeCommand> onOrderProduct(OrderProduct op) {
-        getContext().spawn(OrderProcessor.create(op.order, getContext().getSelf(), spaceSensor, weightSensor), "OrderProcessor-" + UUID.randomUUID() );
+        getContext().spawn(OrderProcessor.create("3", "4", op.order,
+                getContext().getSelf(), spaceSensor, weightSensor), "OrderProcessor-" + UUID.randomUUID());
         return this;
     }
 
@@ -158,6 +166,11 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
             getContext().getLog().info("There are not enough {} in the fridge", cp.product.getName());
         }
 
+        return this;
+    }
+
+    private Fridge onPostStop() {
+        getContext().getLog().info("Fridge actor {}-{} stopped", groupId, deviceId);
         return this;
     }
 }

@@ -2,10 +2,12 @@ package at.fhv.sysarch.lab2.homeautomation.devices.fridge;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
+import akka.actor.typed.PostStop;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import at.fhv.sysarch.lab2.homeautomation.devices.Blind;
 
 public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorCommand> {
     public interface WeightSensorCommand{}
@@ -36,14 +38,18 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
         }
     }
 
+    private final String groupId;
+    private final String deviceId;
     private double maxWeight = 150;
     private double currentWeight = 0;
 
-    public static Behavior<WeightSensor.WeightSensorCommand> create() {
-        return Behaviors.setup(WeightSensor::new);
+    public static Behavior<WeightSensor.WeightSensorCommand> create(String groupId, String deviceId) {
+        return Behaviors.setup(context -> new WeightSensor(context, groupId, deviceId));
     }
-    private WeightSensor(ActorContext<WeightSensorCommand> context) {
+    private WeightSensor(ActorContext<WeightSensorCommand> context, String groupId, String deviceId) {
         super(context);
+        this.groupId = groupId;
+        this.deviceId = deviceId;
     }
 
     @Override
@@ -52,6 +58,7 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
                 .onMessage(RequestFreeWeight.class, this::onRequestFreeWeight)
                 .onMessage(OnSuccessfulOrder.class, this::onSuccessfulOrder)
                 .onMessage(OnConsumeProduct.class, this::onConsumeProduct)
+                .onSignal(PostStop.class, signal -> onPostStop())
                 .build();
     }
 
@@ -82,6 +89,11 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
 
         getContext().getLog().info("New current weight {}", currentWeight);
 
+        return this;
+    }
+
+    private WeightSensor onPostStop() {
+        getContext().getLog().info("WeightSensor actor {}-{} stopped", groupId, deviceId);
         return this;
     }
 }
