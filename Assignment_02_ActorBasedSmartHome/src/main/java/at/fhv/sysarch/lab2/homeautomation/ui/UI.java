@@ -32,14 +32,14 @@ public class UI extends AbstractBehavior<Void> {
     private ActorRef<Fridge.FridgeCommand> fridge;
 
     private List<Product> products = List.of(
-            new Product("Baklava", 5, 2),
-            new Product("Snus", 2, 1),
-            new Product("Ayran", 5, 1),
-            new Product("Simit", 3, 10),
-            new Product("Mercimek Çorbası", 100, 100),
-            new Product("Kisir", 100, 100),
-            new Product("Menemen", 50, 50),
-            new Product("Sigara böreği", 23, 23)
+            new Product("Baklava", 5, 2, 1.50),
+            new Product("Snus", 2, 1, 4.50),
+            new Product("Ayran", 5, 1, 1.50),
+            new Product("Simit", 3, 10, 1.00),
+            new Product("Mercimek Çorbası", 100, 100, 3.00),
+            new Product("Kisir", 100, 100, 3.50),
+            new Product("Menemen", 50, 50, 5.00),
+            new Product("Sigara böreği", 23, 23, 4.00)
     );
 
     public static Behavior<Void> create(
@@ -54,7 +54,7 @@ public class UI extends AbstractBehavior<Void> {
                 airCondition, weatherSensor, blindCondition, mediaStationCondition, fridge));
     }
 
-    private  UI(
+    private UI(
             ActorContext<Void> context,
             ActorRef<EnvironmentActor.EnvironmentCommand> environment,
             ActorRef<TemperatureSensor.TemperatureCommand> tempSensor,
@@ -287,7 +287,10 @@ public class UI extends AbstractBehavior<Void> {
 
         int i = 1;
         for(Product p : products) {
-            System.out.println("(" + i + ") " + p.getName() + " - " + p.getWeight() + "kg" + " - " + p.getSpace() + " space");
+            System.out.println("(" + i + ") " + p.getName() +
+                    " - " + p.getWeight() + "kg" +
+                    " - " + p.getSpace() + " space" +
+                    " - " + p.getPrice() + "€");
             i++;
         }
 
