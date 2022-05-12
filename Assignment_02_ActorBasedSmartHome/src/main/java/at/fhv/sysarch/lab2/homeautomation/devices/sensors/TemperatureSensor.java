@@ -10,6 +10,7 @@ import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab2.homeautomation.devices.AirCondition;
 import at.fhv.sysarch.lab2.homeautomation.environment.EnvironmentActor;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class TemperatureSensor extends AbstractBehavior<TemperatureSensor.TemperatureCommand> {
@@ -27,6 +28,20 @@ public class TemperatureSensor extends AbstractBehavior<TemperatureSensor.Temper
 
         public ReadTemperature(Optional<Double> value) {
             this.value = value;
+        }
+
+        // Added equals and hashcode for testing
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ReadTemperature that = (ReadTemperature) o;
+            return Objects.equals(value, that.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
         }
     }
 

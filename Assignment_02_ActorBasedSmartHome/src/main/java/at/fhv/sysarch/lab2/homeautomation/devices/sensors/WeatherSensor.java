@@ -11,6 +11,7 @@ import at.fhv.sysarch.lab2.homeautomation.devices.Blind;
 import at.fhv.sysarch.lab2.homeautomation.environment.EnvironmentActor;
 import at.fhv.sysarch.lab2.homeautomation.environment.Weather;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class WeatherSensor extends AbstractBehavior<WeatherSensor.WeatherCommand> {
@@ -25,6 +26,20 @@ public class WeatherSensor extends AbstractBehavior<WeatherSensor.WeatherCommand
 
         public ReadWeatherCondition(Optional<Weather> weatherCondition) {
             this.weatherCondition = weatherCondition;
+        }
+
+        // Added equals and hashcode for testing
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ReadWeatherCondition that = (ReadWeatherCondition) o;
+            return Objects.equals(weatherCondition, that.weatherCondition);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(weatherCondition);
         }
     }
 
