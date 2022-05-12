@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.Random;
 
 public class EnvironmentActor extends AbstractBehavior<EnvironmentActor.EnvironmentCommand> {
-    // TODO: Maybe move interface and static classes into own files
     public interface EnvironmentCommand {}
 
     public static final class TemperatureRequest implements EnvironmentCommand {

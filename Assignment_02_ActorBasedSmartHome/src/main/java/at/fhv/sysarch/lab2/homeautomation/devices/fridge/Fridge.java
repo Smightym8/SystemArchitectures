@@ -45,7 +45,6 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         public QueryOrderHistory() {}
     }
 
-    // TODO: Change to stored or current products
     public static final class QueryCurrentProducts implements FridgeCommand {
         public QueryCurrentProducts() {}
     }
