@@ -122,11 +122,12 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     private Behavior<FridgeCommand> onQueryOrderHistory(QueryOrderHistory qoh) {
         if(orderHistory.size() > 0) {
             getContext().getLog().info("Order History");
+            getContext().getLog().info("-----------------------------");
 
             orderHistory.forEach((timestamp ,order) -> {
                 getContext().getLog().info("{}", timestamp);
-                getContext().getLog().info("-----------------------------");
-                getContext().getLog().info("{} of {}", order.getQuantity(), order.getProduct().getName());
+                getContext().getLog().info("{} of {} for {}€ per piece", order.getQuantity(), order.getProduct().getName(), order.getProduct().getPrice());
+                getContext().getLog().info("Total cost: {}€", order.getQuantity() * order.getProduct().getPrice());
                 getContext().getLog().info("-----------------------------");
             });
         } else {
@@ -140,7 +141,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         if(products.size() > 0) {
             getContext().getLog().info("Available Products");
 
-            products.forEach((product, quantity) -> getContext().getLog().info("{} of {}", product.getName(), quantity));
+            products.forEach((product, quantity) -> getContext().getLog().info("{} of {}", quantity, product.getName()));
         } else {
             getContext().getLog().info("No products available");
         }
@@ -152,7 +153,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         getContext().getLog().info("Someone is consuming {} {}", cp.quantity, cp.product.getName());
 
         if (products.containsKey(cp.product) && products.get(cp.product) >= cp.quantity) {
-            products.put(cp.product, products.get(cp.product) - 1);
+            products.put(cp.product, products.get(cp.product) - cp.quantity);
 
             if (products.get(cp.product) == 0) {
                 Order order = new Order(cp.product, 1);

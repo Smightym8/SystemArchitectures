@@ -77,7 +77,7 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
 
         currentWeight += oso.order.getProduct().getWeight() * oso.order.getQuantity();
 
-        getContext().getLog().info("New current weight {}", currentWeight);
+        getContext().getLog().info("New free weight {}", (maxWeight - currentWeight));
 
         return this;
     }
@@ -87,7 +87,7 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
 
         currentWeight -= ocp.product.getWeight() * ocp.quantity;
 
-        getContext().getLog().info("New current weight {}", currentWeight);
+        getContext().getLog().info("New free weight {}", (maxWeight - currentWeight));
 
         return this;
     }

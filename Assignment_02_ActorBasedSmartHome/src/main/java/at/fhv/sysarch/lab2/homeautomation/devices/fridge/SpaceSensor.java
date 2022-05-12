@@ -39,7 +39,7 @@ public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand
 
     private final String groupId;
     private final String deviceId;
-    private int maxSpace = 30;
+    private int maxSpace = 70;
     private int currentSpace = 0;
 
     public static Behavior<SpaceSensor.SpaceSensorCommand> create(String groupId, String deviceId) {
@@ -77,7 +77,7 @@ public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand
 
         currentSpace += oso.order.getQuantity() * oso.order.getProduct().getSpace();
 
-        getContext().getLog().info("New current space {}", currentSpace);
+        getContext().getLog().info("New free space {}", (maxSpace - currentSpace));
 
         return this;
     }
@@ -87,7 +87,7 @@ public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand
 
         currentSpace -= ocp.product.getSpace() * ocp.quantity;
 
-        getContext().getLog().info("New current space {}", currentSpace);
+        getContext().getLog().info("New free space {}", (maxSpace - currentSpace));
 
         return this;
     }
