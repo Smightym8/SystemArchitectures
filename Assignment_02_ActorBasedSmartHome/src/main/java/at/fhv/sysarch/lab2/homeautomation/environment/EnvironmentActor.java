@@ -13,8 +13,23 @@ import java.util.Optional;
 import java.util.Random;
 
 public class EnvironmentActor extends AbstractBehavior<EnvironmentActor.EnvironmentCommand> {
-    // TODO: Maybe move interface and static classes into own files
     public interface EnvironmentCommand {}
+
+    public static final class TemperatureRequest implements EnvironmentCommand {
+        ActorRef<TemperatureSensor.TemperatureCommand> replyTo;
+
+        public TemperatureRequest(ActorRef<TemperatureSensor.TemperatureCommand> replyTo) {
+            this.replyTo = replyTo;
+        }
+    }
+
+    public static final class WeatherRequest implements EnvironmentCommand {
+        ActorRef<WeatherSensor.WeatherCommand> replyTo;
+
+        public WeatherRequest(ActorRef<WeatherSensor.WeatherCommand> replyTo) {
+            this.replyTo = replyTo;
+        }
+    }
 
     public static final class TemperatureChanger implements EnvironmentCommand {
         Optional<Double> temperature;
@@ -25,69 +40,65 @@ public class EnvironmentActor extends AbstractBehavior<EnvironmentActor.Environm
     }
 
     public static final class WeatherChanger implements EnvironmentCommand {
-        Optional<Weather> currentWeater;
+        Optional<Weather> currentWeather;
 
         public WeatherChanger(Optional<Weather> weather) {
-            this.currentWeater = weather;
+            this.currentWeather = weather;
         }
     }
 
-    private double temperature = 10;
-    private Weather weather = Weather.SUNNY;
+    private double currentTemperature = 10;
+    private Weather currentWeather = Weather.SUNNY;
     private final TimerScheduler<EnvironmentCommand> temperatureTimerScheduler;
     private final TimerScheduler<EnvironmentCommand> weatherTimerScheduler;
 
-    private final ActorRef<TemperatureSensor.TemperatureCommand> temperatureSensor;
-    private final ActorRef<WeatherSensor.WeatherCommand> weatherSensor;
-
-    public static Behavior<EnvironmentCommand> create(ActorRef<TemperatureSensor.TemperatureCommand> temperatureSensor, ActorRef<WeatherSensor.WeatherCommand> weatherSensor) {
-        return Behaviors.setup(context -> Behaviors.withTimers(timers -> new EnvironmentActor(context, temperatureSensor, weatherSensor, timers, timers)));
+    public static Behavior<EnvironmentCommand> create() {
+        return Behaviors.setup(context -> Behaviors.withTimers(timers -> new EnvironmentActor(context, timers, timers)));
     }
 
-    public EnvironmentActor(
+    private EnvironmentActor(
             ActorContext<EnvironmentCommand> context,
-            ActorRef<TemperatureSensor.TemperatureCommand> temperatureSensor,
-            ActorRef<WeatherSensor.WeatherCommand> weatherSensor,
             TimerScheduler<EnvironmentCommand> tempTimer,
             TimerScheduler<EnvironmentCommand> weatherTimer
     ) {
         super(context);
-        this.temperatureSensor = temperatureSensor;
-        this.weatherSensor = weatherSensor;
         this.temperatureTimerScheduler = tempTimer;
         this.weatherTimerScheduler = weatherTimer;
-        this.temperatureTimerScheduler.startTimerAtFixedRate(new TemperatureChanger(Optional.of(temperature)), Duration.ofSeconds(5));
-        this.weatherTimerScheduler.startTimerAtFixedRate(new WeatherChanger(Optional.of(weather)), Duration.ofSeconds(20));
+        this.temperatureTimerScheduler.startTimerAtFixedRate(new TemperatureChanger(Optional.of(currentTemperature)), Duration.ofSeconds(5));
+        this.weatherTimerScheduler.startTimerAtFixedRate(new WeatherChanger(Optional.of(currentWeather)), Duration.ofSeconds(20));
     }
 
     @Override
     public Receive<EnvironmentCommand> createReceive() {
         return newReceiveBuilder()
+                .onMessage(TemperatureRequest.class, this::onTemperatureRequest)
                 .onMessage(TemperatureChanger.class, this::onTemperatureChange)
+                .onMessage(WeatherRequest.class, this::onWeatherRequest)
                 .onMessage(WeatherChanger.class, this::onWeatherChange)
                 .onSignal(PostStop.class, signal -> onPostStop())
                 .build();
     }
 
-    private Behavior<EnvironmentCommand> onTemperatureChange(TemperatureChanger t) {
-        // Tell TemperatureSensor that the temperature changed
-        getContext().getLog().info("Temperature changed to {}", new DecimalFormat("0.00").format(temperature));
+    private Behavior<EnvironmentCommand> onTemperatureRequest(TemperatureRequest tr) {
+        getContext().getLog().info("Telling {} the current temperature", tr.replyTo);
+        tr.replyTo.tell(new TemperatureSensor.ReadTemperature(Optional.of(currentTemperature)));
+        return this;
+    }
 
-        temperatureSensor.tell(
-                new TemperatureSensor.ReadTemperature(Optional.of(temperature))
-        );
+    private Behavior<EnvironmentCommand> onTemperatureChange(TemperatureChanger t) {
+        //getContext().getLog().info("Temperature changed to {}", new DecimalFormat("0.00").format(t.temperature.get()));
 
         Random random = new Random();
 
-        switch (weather) {
+        switch (currentWeather) {
             case SUNNY:
-                temperature = 21 + (35 - 20) * random.nextDouble();
+                currentTemperature = t.temperature.get() + (35 - 20) * random.nextDouble();
                 break;
             case FOGGY:
-                temperature = 0 + 10 * random.nextDouble();
+                currentTemperature = t.temperature.get() + 10 * random.nextDouble();
                 break;
             case RAINY:
-                temperature = 11 + (20 - 10) * random.nextDouble();
+                currentTemperature = t.temperature.get() + (20 - 10) * random.nextDouble();
                 break;
             // default: temperature = 0;
         }
@@ -95,14 +106,19 @@ public class EnvironmentActor extends AbstractBehavior<EnvironmentActor.Environm
         return this;
     }
 
+    private Behavior<EnvironmentCommand> onWeatherRequest(WeatherRequest wr) {
+        getContext().getLog().info("Telling {} the current weather", wr.replyTo);
+        wr.replyTo.tell(new WeatherSensor.ReadWeatherCondition(Optional.of(currentWeather)));
+        return this;
+    }
+
     private Behavior<EnvironmentCommand> onWeatherChange(WeatherChanger w) {
         // Tell the WeatherSensor that the weather changed
-        getContext().getLog().info("Weather changed to " + weather.getFriendlyName());
-        weatherSensor.tell(new WeatherSensor.ReadWeatherCondition(Optional.of(weather)));
+        //getContext().getLog().info("Weather changed to " + currentWeather.getFriendlyName());
 
         // Switch random between sunny and not sunny
         Random random = new Random();
-        weather = Weather.values()[(random.nextInt(2))];
+        currentWeather = Weather.values()[(random.nextInt(2))];
 
         return this;
     }

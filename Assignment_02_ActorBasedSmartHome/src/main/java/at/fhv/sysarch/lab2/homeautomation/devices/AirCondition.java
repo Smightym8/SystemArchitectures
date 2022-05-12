@@ -45,15 +45,15 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     private boolean active = false;
     private boolean poweredOn = true;
 
-    public AirCondition(ActorContext<AirConditionCommand> context, String groupId, String deviceId) {
+    public static Behavior<AirConditionCommand> create(String groupId, String deviceId) {
+        return Behaviors.setup(context -> new AirCondition(context, groupId, deviceId));
+    }
+
+    private AirCondition(ActorContext<AirConditionCommand> context, String groupId, String deviceId) {
         super(context);
         this.groupId = groupId;
         this.deviceId = deviceId;
         getContext().getLog().info("AirCondition started");
-    }
-
-    public static Behavior<AirConditionCommand> create(String groupId, String deviceId) {
-        return Behaviors.setup(context -> new AirCondition(context, groupId, deviceId));
     }
 
     @Override
@@ -67,8 +67,8 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
 
     private Behavior<AirConditionCommand> onReadTemperature(EnrichedTemperature r) {
         getContext().getLog().info("Aircondition reading {}", r.value.get());
-        // TODO: process temperature
-        if(r.value.get() >= 15 && !this.active) {
+
+        if(r.value.get() >= 20 && !this.active) {
             getContext().getLog().info("Aircondition actived");
             this.active = true;
         }
@@ -81,7 +81,9 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     }
 
     private Behavior<AirConditionCommand> onPowerAirConditionOff(PowerAirCondition r) {
-        getContext().getLog().info("Turning Aircondition to {}", r.value);
+        String state = r.value.get() ? "on" : "off";
+
+        getContext().getLog().info("Turning Aircondition {}", state);
 
         if(r.value.get() == false) {
             return this.powerOff();
@@ -90,7 +92,9 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     }
 
     private Behavior<AirConditionCommand> onPowerAirConditionOn(PowerAirCondition r) {
-        getContext().getLog().info("Turning Aircondition to {}", r.value);
+        String state = r.value.get() ? "on" : "off";
+
+        getContext().getLog().info("Turning Aircondition {}", state);
 
         if(r.value.get() == true) {
             return this.powerOn();
