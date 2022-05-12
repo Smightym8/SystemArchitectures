@@ -33,13 +33,13 @@ public class UI extends AbstractBehavior<Void> {
 
     private List<Product> products = List.of(
             new Product("Baklava", 5, 2, 1.50),
-            new Product("Snus", 2, 1, 4.50),
+            new Product("Apple", 2, 1, 1.50),
             new Product("Ayran", 5, 1, 1.50),
-            new Product("Simit", 3, 10, 1.00),
-            new Product("Mercimek Çorbası", 100, 100, 3.00),
-            new Product("Kisir", 100, 100, 3.50),
-            new Product("Menemen", 50, 50, 5.00),
-            new Product("Sigara böreği", 23, 23, 4.00)
+            new Product("Pizza", 3, 5, 5.00),
+            new Product("Ice Tea", 4, 4, 2.00),
+            new Product("Steak", 10, 12, 43.50),
+            new Product("Eggs", 4, 8, 5.00),
+            new Product("Chocolate", 23, 23, 44.00)
     );
 
     public static Behavior<Void> create(
