@@ -64,8 +64,6 @@ public class UI extends AbstractBehavior<Void> {
             ActorRef<MediaStation.MediaStationCommand> mediaStationCondition,
             ActorRef<Fridge.FridgeCommand> fridge) {
         super(context);
-        // TODO: implement actor and behavior as needed
-        // TODO: move UI initialization to appropriate place
         this.environment = environment;
         this.airCondition = airCondition;
         this.tempSensor = tempSensor;

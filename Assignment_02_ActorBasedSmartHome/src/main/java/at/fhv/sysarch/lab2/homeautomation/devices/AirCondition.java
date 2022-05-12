@@ -81,7 +81,9 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     }
 
     private Behavior<AirConditionCommand> onPowerAirConditionOff(PowerAirCondition r) {
-        getContext().getLog().info("Turning Aircondition to {}", r.value);
+        String state = r.value.get() ? "on" : "off";
+
+        getContext().getLog().info("Turning Aircondition {}", state);
 
         if(r.value.get() == false) {
             return this.powerOff();
@@ -90,7 +92,9 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     }
 
     private Behavior<AirConditionCommand> onPowerAirConditionOn(PowerAirCondition r) {
-        getContext().getLog().info("Turning Aircondition to {}", r.value);
+        String state = r.value.get() ? "on" : "off";
+
+        getContext().getLog().info("Turning Aircondition {}", state);
 
         if(r.value.get() == true) {
             return this.powerOn();
