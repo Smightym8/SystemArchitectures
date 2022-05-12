@@ -7,7 +7,7 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import at.fhv.sysarch.lab2.homeautomation.devices.BlindCondition;
+import at.fhv.sysarch.lab2.homeautomation.devices.Blind;
 import at.fhv.sysarch.lab2.homeautomation.environment.EnvironmentActor;
 import at.fhv.sysarch.lab2.homeautomation.environment.Weather;
 
@@ -31,13 +31,13 @@ public class WeatherSensor extends AbstractBehavior<WeatherSensor.WeatherCommand
     private final String groupId;
     private final String deviceId;
     private ActorRef<EnvironmentActor.EnvironmentCommand> environment;
-    private ActorRef<BlindCondition.BlindCommand> blindCondition;
+    private ActorRef<Blind.BlindCommand> blindCondition;
 
-    public static Behavior<WeatherCommand> create(ActorRef<EnvironmentActor.EnvironmentCommand> environment, ActorRef<BlindCondition.BlindCommand> blindCondition, String groupId, String deviceId) {
+    public static Behavior<WeatherCommand> create(ActorRef<EnvironmentActor.EnvironmentCommand> environment, ActorRef<Blind.BlindCommand> blindCondition, String groupId, String deviceId) {
         return Behaviors.setup(context -> new WeatherSensor(context, environment, blindCondition, groupId, deviceId));
     }
 
-    private WeatherSensor(ActorContext<WeatherCommand> context, ActorRef<EnvironmentActor.EnvironmentCommand> environment,  ActorRef<BlindCondition.BlindCommand> blindCondition, String groupId, String deviceId) {
+    private WeatherSensor(ActorContext<WeatherCommand> context, ActorRef<EnvironmentActor.EnvironmentCommand> environment, ActorRef<Blind.BlindCommand> blindCondition, String groupId, String deviceId) {
         super(context);
         this.groupId = groupId;
         this.deviceId = deviceId;
@@ -64,7 +64,7 @@ public class WeatherSensor extends AbstractBehavior<WeatherSensor.WeatherCommand
     private Behavior<WeatherCommand> onReadWeatherCondition(ReadWeatherCondition weatherCondition) {
         getContext().getLog().info("WeatherSensor received {}", weatherCondition.weatherCondition.get().getFriendlyName());
         // Tell blinds and return same behaviour
-        blindCondition.tell(new BlindCondition.ChangedWeather(weatherCondition.weatherCondition));
+        blindCondition.tell(new Blind.ChangedWeather(weatherCondition.weatherCondition));
         return this;
     }
 

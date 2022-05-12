@@ -29,17 +29,17 @@ public class MediaStation extends AbstractBehavior<MediaStation.MediaStationComm
         }
     }
 
-    private ActorRef<BlindCondition.BlindCommand> blindCondition;
+    private ActorRef<Blind.BlindCommand> blindCondition;
     private final String groupId;
     private final String deviceId;
     private boolean poweredOn = true;
     private boolean isPlaying = false;
 
-    public static Behavior<MediaStationCommand> create(ActorRef<BlindCondition.BlindCommand> blindCondition, String groupId, String deviceId) {
+    public static Behavior<MediaStationCommand> create(ActorRef<Blind.BlindCommand> blindCondition, String groupId, String deviceId) {
         return Behaviors.setup(context -> new MediaStation(context, blindCondition, groupId, deviceId));
     }
 
-    private MediaStation(ActorContext<MediaStationCommand> context, ActorRef<BlindCondition.BlindCommand> blindCondition, String groupId, String deviceId) {
+    private MediaStation(ActorContext<MediaStationCommand> context, ActorRef<Blind.BlindCommand> blindCondition, String groupId, String deviceId) {
         super(context);
         this.blindCondition = blindCondition;
         this.groupId = groupId;
@@ -85,7 +85,7 @@ public class MediaStation extends AbstractBehavior<MediaStation.MediaStationComm
             this.isPlaying = false;
         }
 
-        blindCondition.tell(new BlindCondition.ChangedMoviePlaying(Optional.of(isPlaying)));
+        blindCondition.tell(new Blind.ChangedMoviePlaying(Optional.of(isPlaying)));
 
         return this; // return same behavior
     }
@@ -104,7 +104,7 @@ public class MediaStation extends AbstractBehavior<MediaStation.MediaStationComm
         this.poweredOn = false;
         this.isPlaying = false;
 
-        blindCondition.tell(new BlindCondition.ChangedMoviePlaying(Optional.of(isPlaying)));
+        blindCondition.tell(new Blind.ChangedMoviePlaying(Optional.of(isPlaying)));
         // Change Behavior
         return Behaviors.receive(MediaStation.MediaStationCommand.class)
                 .onMessage(PowerMediaStation.class, this::onPowerMediaStationOn)

@@ -10,7 +10,7 @@ import at.fhv.sysarch.lab2.homeautomation.environment.Weather;
 
 import java.util.Optional;
 
-public class BlindCondition extends AbstractBehavior<BlindCondition.BlindCommand> {
+public class Blind extends AbstractBehavior<Blind.BlindCommand> {
     public interface BlindCommand {}
 
     public static final class ChangedWeather implements BlindCommand {
@@ -36,10 +36,10 @@ public class BlindCondition extends AbstractBehavior<BlindCondition.BlindCommand
     private Weather currentWeather = Weather.RAINY;
 
     public static Behavior<BlindCommand> create(String groupId, String deviceId) {
-        return Behaviors.setup(context -> new BlindCondition(context, groupId, deviceId));
+        return Behaviors.setup(context -> new Blind(context, groupId, deviceId));
     }
 
-    private BlindCondition(ActorContext<BlindCommand> context, String groupId, String deviceId) {
+    private Blind(ActorContext<BlindCommand> context, String groupId, String deviceId) {
         super(context);
         this.groupId = groupId;
         this.deviceId = deviceId;
@@ -64,7 +64,7 @@ public class BlindCondition extends AbstractBehavior<BlindCondition.BlindCommand
     }
 
     private Behavior<BlindCommand> onChangedMoviePlaying(ChangedMoviePlaying changedMoviePlaying){
-        getContext().getLog().info("Blind reading from MediaStation {}", changedMoviePlaying.isPlaying.get());
+        getContext().getLog().info("Blinds reading from MediaStation {}", changedMoviePlaying.isPlaying.get());
 
         this.isMediaStationMoviePlaying = changedMoviePlaying.isPlaying.get();
         changeBlindCondition();
@@ -85,7 +85,7 @@ public class BlindCondition extends AbstractBehavior<BlindCondition.BlindCommand
         }
     }
 
-    private BlindCondition onPostStop() {
+    private Blind onPostStop() {
         getContext().getLog().info("Blind actor {}-{} stopped", groupId, deviceId);
         return this;
     }
