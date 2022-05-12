@@ -86,7 +86,6 @@ public class UI extends AbstractBehavior<Void> {
         return this;
     }
 
-    // TODO: Change output when turning AirCondition on off
     public void runCommandLine() {
         Scanner scanner = new Scanner(System.in);
         String input;
@@ -149,7 +148,7 @@ public class UI extends AbstractBehavior<Void> {
         }
 
         System.out.println("Goodbye!");
-        getContext().getLog().info("UI done");
+        System.exit(0);
     }
 
     private void setTemperature(Scanner scanner) {
@@ -200,7 +199,6 @@ public class UI extends AbstractBehavior<Void> {
         }
     }
 
-    // TODO: Move them to one method and add acpower/mediapower/playmovie as parameter
     private void handleAcPower(Scanner scanner) {
         System.out.println("(1) Turn AirCondition on");
         System.out.println("(2) Turn AirCondition off");
@@ -315,7 +313,6 @@ public class UI extends AbstractBehavior<Void> {
     }
 
     private void handleConsume(Scanner scanner) {
-        // TODO: implement
         System.out.println("Available products");
         System.out.println("--------------------");
 
