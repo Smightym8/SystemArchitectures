@@ -23,10 +23,9 @@ public class Source<I extends Face, O extends Face> implements IPushFilter<Face,
     }
 
     public void start() {
-        while (!faces.isEmpty()) {
-            // Push always the last element
-            push(faces.remove(faces.size() - 1));
-        }
+        faces.forEach(this::push);
+
+        push(null);
     }
 
     public void setModel(Model model) {

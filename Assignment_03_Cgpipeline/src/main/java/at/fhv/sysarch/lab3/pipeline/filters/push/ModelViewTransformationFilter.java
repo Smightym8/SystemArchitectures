@@ -16,16 +16,20 @@ public class ModelViewTransformationFilter<I extends  Face, O extends Face> impl
 
     @Override
     public void push(Face data) {
-        pipeSuccessor.push(
-                new Face(
-                        modelViewMatrix.multiply(data.getV1()),
-                        modelViewMatrix.multiply(data.getV2()),
-                        modelViewMatrix.multiply(data.getV3()),
-                        modelViewMatrix.multiply(data.getN1()),
-                        modelViewMatrix.multiply(data.getN2()),
-                        modelViewMatrix.multiply(data.getN3())
-                )
-        );
+        if(data == null) {
+            pipeSuccessor.push(null);
+        } else {
+            pipeSuccessor.push(
+                    new Face(
+                            modelViewMatrix.multiply(data.getV1()),
+                            modelViewMatrix.multiply(data.getV2()),
+                            modelViewMatrix.multiply(data.getV3()),
+                            modelViewMatrix.multiply(data.getN1()),
+                            modelViewMatrix.multiply(data.getN2()),
+                            modelViewMatrix.multiply(data.getN3())
+                    )
+            );
+        }
     }
 
     public void setModelViewMatrix(Mat4 modelViewMatrix) {

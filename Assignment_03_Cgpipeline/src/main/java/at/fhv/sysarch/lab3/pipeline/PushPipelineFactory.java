@@ -31,12 +31,16 @@ public class PushPipelineFactory {
         PushPipe<Face> backFaceCullingPipe = new PushPipe<>();
         backFaceCullingFilter.setPipeSuccessor(backFaceCullingPipe);
 
-        // TODO 3. perform depth sorting in VIEW SPACE
+        // perform depth sorting in VIEW SPACE
+        DepthSortingFilter<Face, Face> depthSortingFilter = new DepthSortingFilter<>();
+        backFaceCullingPipe.setFilterSuccessor(depthSortingFilter);
+        PushPipe<Face> depthSortingPipe = new PushPipe<>();
+        depthSortingFilter.setPipeSuccessor(depthSortingPipe);
 
         // add coloring (space unimportant)
         ColoringFilter<Face, Pair<Face, Color>> coloringFilter = new ColoringFilter<>();
         coloringFilter.setPipelineData(pd);
-        backFaceCullingPipe.setFilterSuccessor(coloringFilter);
+        depthSortingPipe.setFilterSuccessor(coloringFilter);
         PushPipe<Pair<Face, Color>> coloringPipe = new PushPipe<>();
         coloringFilter.setPipeSuccessor(coloringPipe);
 
@@ -53,13 +57,14 @@ public class PushPipelineFactory {
             // 5. perform projection transformation on VIEW SPACE coordinates
             ProjectionTransformationFilter<Pair<Face, Color>, Pair<Face, Color>> projectionTransformationFilter = new ProjectionTransformationFilter<>();
             projectionTransformationFilter.setPipelineData(pd);
+            projectionTransformationFilter.setPipeSuccessor(projectionTransformationPipe);
             lightingPipe.setFilterSuccessor(projectionTransformationFilter);
         } else {
             // 5. perform projection transformation
             ProjectionTransformationFilter<Pair<Face, Color>, Pair<Face, Color>> projectionTransformationFilter = new ProjectionTransformationFilter<>();
+            projectionTransformationFilter.setPipeSuccessor(projectionTransformationPipe);
             coloringPipe.setFilterSuccessor(projectionTransformationFilter);
             projectionTransformationFilter.setPipelineData(pd);
-
         }
 
         // perform perspective division to screen coordinates

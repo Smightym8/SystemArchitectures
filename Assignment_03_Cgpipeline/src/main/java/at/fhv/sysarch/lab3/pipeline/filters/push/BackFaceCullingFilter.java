@@ -13,8 +13,12 @@ public class BackFaceCullingFilter<I extends Face, O extends  Face> implements I
 
     @Override
     public void push(Face data) {
-        if(data.getV1().dot(data.getN1()) < 0) {
-            pipeSuccessor.push(data);
+        if(data == null) {
+            pipeSuccessor.push(null);
+        } else {
+            if(data.getV1().dot(data.getN1()) < 0) {
+                pipeSuccessor.push(data);
+            }
         }
     }
 }
