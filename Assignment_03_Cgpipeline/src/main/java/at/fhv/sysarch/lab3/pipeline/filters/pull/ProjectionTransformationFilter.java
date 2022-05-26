@@ -17,19 +17,15 @@ public class ProjectionTransformationFilter<I extends Pair<Face, Color>, O exten
 
     @Override
     public Pair<Face, Color> pull() {
-        if(!hasNext()) {
-            return null;
-        }
-
         Pair<Face, Color> faceColorPair = pipePredecessor.pull();
         Face oldFace = faceColorPair.fst();
 
-       Face newFace = new Face(
+        Face newFace = new Face(
                pd.getProjTransform().multiply(oldFace.getV1()),
                pd.getProjTransform().multiply(oldFace.getV2()),
                pd.getProjTransform().multiply(oldFace.getV3()),
                oldFace
-       );
+        );
 
         return new Pair<>(newFace, faceColorPair.snd());
     }

@@ -17,10 +17,6 @@ public class PerspectiveDivisionFilter<I extends Pair<Face, Color>, O extends Pa
 
     @Override
     public Pair<Face, Color> pull() {
-        if(!hasNext()) {
-            return null;
-        }
-
         Pair<Face, Color> faceColorPair = pipePredecessor.pull();
 
         Face oldFace = faceColorPair.fst();

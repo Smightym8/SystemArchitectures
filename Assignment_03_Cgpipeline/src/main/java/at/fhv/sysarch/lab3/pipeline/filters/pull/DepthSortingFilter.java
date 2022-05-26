@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 public class DepthSortingFilter<I extends Face, O extends Face> implements IPullFilter<Face, Face>{
     private IPullPipe<Face, Face> pipePredecessor;
-    private final List<Face> unsortedFaces = new ArrayList<>();
     private List<Face> sortedFaces = new ArrayList<>();
 
     @Override
@@ -21,24 +20,18 @@ public class DepthSortingFilter<I extends Face, O extends Face> implements IPull
     @Override
     public Face pull() {
         // Pull all faces
-        while (hasNext()) {
-            unsortedFaces.add(pipePredecessor.pull());
+        while (pipePredecessor.hasNext()) {
+            sortedFaces.add(pipePredecessor.pull());
         }
 
         // Sort faces
-        sortedFaces = unsortedFaces.stream()
-                .sorted(
-                        Comparator.comparing(face ->
-                                face.getV1().getZ() + face.getV2().getZ() + face.getV3().getZ()
-                        )
-                )
-                .collect(Collectors.toList());
+        sortedFaces.sort(Comparator.comparing(face -> face.getV1().getZ() + face.getV2().getZ() + face.getV3().getZ()));
 
-        return !hasNext() ? null : sortedFaces.remove(0);
+        return sortedFaces.isEmpty() ? null : sortedFaces.remove(0);
     }
 
     @Override
     public boolean hasNext() {
-        return pipePredecessor.hasNext() && !sortedFaces.isEmpty();
+        return !sortedFaces.isEmpty() || pipePredecessor.hasNext();
     }
 }

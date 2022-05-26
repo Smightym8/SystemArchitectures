@@ -16,10 +16,6 @@ public class LightingFilter<I extends Pair<Face, Color>, O extends Pair<Face, Co
 
     @Override
     public Pair<Face, Color> pull() {
-        if(!hasNext()) {
-            return null;
-        }
-
         Pair<Face, Color> faceColorPair = pipePredecessor.pull();
         Face face = faceColorPair.fst();
         Color color = faceColorPair.snd();

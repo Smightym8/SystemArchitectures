@@ -17,10 +17,6 @@ public class ColoringFilter<I extends Face, O extends Pair<Face, Color>> impleme
 
     @Override
     public Pair<Face, Color> pull() {
-        if(!hasNext()) {
-            return null;
-        }
-
         Face face = pipePredecessor.pull();
         return new Pair<>(face, pd.getModelColor());
     }

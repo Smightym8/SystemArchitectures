@@ -92,7 +92,7 @@ public class PullPipelineFactory {
             protected void render(float fraction, Model model) {
                 // compute rotation in radians
                 totalRotation = totalRotation + fraction;
-                float radian = (float) Math.toRadians(totalRotation);
+                float radian = (float) (totalRotation % (2 * Math.PI));
 
                 // create new model rotation matrix using pd.getModelRotAxis and Matrices.rotate
                 Mat4 rotationMatrix = Matrices.rotate(radian, pd.getModelRotAxis());
@@ -104,7 +104,7 @@ public class PullPipelineFactory {
                 modelViewTransformationFilter.setModelViewMatrix(modelToViewMatrix);
 
                 // trigger rendering of the pipeline
-                source.setModel(pd.getModel());
+                source.setModel(model);
                 sink.start();
             }
         };

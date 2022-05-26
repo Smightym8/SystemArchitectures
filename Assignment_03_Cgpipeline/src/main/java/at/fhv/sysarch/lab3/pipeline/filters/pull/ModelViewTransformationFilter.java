@@ -15,10 +15,6 @@ public class ModelViewTransformationFilter<I extends Face, O extends Face> imple
 
     @Override
     public Face pull() {
-        if(!hasNext()) {
-            return null;
-        }
-
         Face face = pipePredecessor.pull();
 
         return new Face(

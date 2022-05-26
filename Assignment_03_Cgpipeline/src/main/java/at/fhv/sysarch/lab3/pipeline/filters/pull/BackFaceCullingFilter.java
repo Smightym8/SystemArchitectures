@@ -5,6 +5,7 @@ import at.fhv.sysarch.lab3.pipeline.pipes.pull.IPullPipe;
 
 public class BackFaceCullingFilter<I extends Face, O extends Face> implements IPullFilter<Face, Face> {
     private IPullPipe<Face, Face> pipePredecessor;
+    private Face storedFace = null;
     @Override
     public void setPipePredecessor(IPullPipe<Face, Face> pipePredecessor) {
         this.pipePredecessor = pipePredecessor;
@@ -12,19 +13,26 @@ public class BackFaceCullingFilter<I extends Face, O extends Face> implements IP
 
     @Override
     public Face pull() {
-        if(!hasNext()) {
-            return null;
-        }
+        prepareNext();
+        Face face = storedFace;
+        storedFace = null;
 
-        Face face = pipePredecessor.pull();
-
-        boolean isCullingFace = face.getV1().dot(face.getN1()) > 0;
-
-        return isCullingFace ? pull() : face;
+        return face;
     }
 
     @Override
     public boolean hasNext() {
-        return pipePredecessor.hasNext();
+        prepareNext();
+        return storedFace != null;
+    }
+
+    private void prepareNext() {
+        while(pipePredecessor.hasNext() && storedFace == null) {
+            Face face = pipePredecessor.pull();
+
+            if(face.getV1().dot(face.getN1()) < 0) {
+                storedFace = face;
+            }
+        }
     }
 }
