@@ -26,5 +26,5 @@ javafx {
 
 application {
     // Define the main class for the application.
-    mainClassName = 'at.fhv.sysarch.lab3.Launcher'
+    mainClassName = 'at.fhv.sysarch.lab3.Main'
 }
