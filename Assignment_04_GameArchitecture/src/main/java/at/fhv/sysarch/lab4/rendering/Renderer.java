@@ -51,6 +51,13 @@ public class Renderer extends AnimationTimer {
 
     private Physics physics;
 
+    // Cue coordinates
+    private Optional<Double> cueStartX;
+    private Optional<Double> cueStartY;
+    private Optional<Double> cueEndX;
+    private Optional<Double> cueEndY;
+    private boolean cueCoordinatesPresent = false;
+
     public Renderer(final GraphicsContext gc, 
         int sceneWidth, int sceneHeight, Physics physics) {
         this.gc = gc;
@@ -232,7 +239,33 @@ public class Renderer extends AnimationTimer {
     }
 
     private void drawCue() {
-        // TODO: draw cue
+        if(cueCoordinatesPresent) {
+            this.gc.setTransform(this.jfxCoords);
+            this.gc.setStroke(Color.BLACK);
+            this.gc.setLineWidth(3);
+            this.gc.strokeLine(cueStartX.get(), cueStartY.get(), cueEndX.get(), cueEndY.get());
+        }
+    }
+
+    public void createCue() {
+        this.cueStartX = Optional.empty();
+        this.cueStartY = Optional.empty();
+        this.cueEndX = Optional.empty();
+        this.cueEndY = Optional.empty();
+    }
+
+    public void setCueStart(double x, double y) {
+        this.cueStartX = Optional.of(x);
+        this.cueStartY = Optional.of(y);
+    }
+
+    public void setCueEnd(double x, double y) {
+        this.cueEndX = Optional.of(x);
+        this.cueEndY = Optional.of(y);
+    }
+
+    public void setCueCoordinatesPresent(boolean cueCoordinatesPresent) {
+        this.cueCoordinatesPresent = cueCoordinatesPresent;
     }
 
     private void drawFPS(double dt) {

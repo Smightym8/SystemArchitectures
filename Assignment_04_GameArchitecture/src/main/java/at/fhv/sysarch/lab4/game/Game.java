@@ -39,9 +39,15 @@ public class Game {
             if(results.get(0).getBody().getUserData() instanceof Ball)
                 results.get(0).getBody().applyForce(new Vector2(1, 0).multiply(750));
         }
+
+        this.renderer.setCueCoordinatesPresent(true);
+        this.renderer.setCueStart(x, y);
     }
 
     public void onMouseReleased(MouseEvent e) {
+        // When mouse is released create cue
+        this.renderer.createCue();
+        this.renderer.setCueCoordinatesPresent(false);
     }
 
     public void setOnMouseDragged(MouseEvent e) {
@@ -50,6 +56,8 @@ public class Game {
 
         double pX = renderer.screenToPhysicsX(x);
         double pY = renderer.screenToPhysicsY(y);
+
+        this.renderer.setCueEnd(x, y);
     }
 
     private void placeBalls(List<Ball> balls) {
@@ -70,6 +78,7 @@ public class Game {
             b.setPosition(x, y);
             b.getBody().setLinearVelocity(0, 0);
             renderer.addBall(b);
+            physics.getWorld().addBody(b.getBody());
 
             row++;
 
