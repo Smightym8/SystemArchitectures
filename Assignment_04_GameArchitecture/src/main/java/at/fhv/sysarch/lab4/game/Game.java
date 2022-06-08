@@ -63,8 +63,10 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
                 if (((Ball) results.get(0).getBody().getUserData()).isWhite()) {
                     // Only apply force to white ball
                     results.get(0).getBody().applyForce(direction.multiply(750));
+                } else {
+                    // TODO: foul, switch player
+
                 }
-                // TODO: foul, switch player
             }
         }
 
