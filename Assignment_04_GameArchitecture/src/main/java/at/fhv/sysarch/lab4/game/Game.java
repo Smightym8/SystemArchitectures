@@ -1,21 +1,25 @@
 package at.fhv.sysarch.lab4.game;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import at.fhv.sysarch.lab4.physics.BallPocketedListener;
+import at.fhv.sysarch.lab4.physics.BallsCollisionListener;
+import at.fhv.sysarch.lab4.physics.ObjectsRestListener;
 import at.fhv.sysarch.lab4.physics.Physics;
 import at.fhv.sysarch.lab4.rendering.Renderer;
 import javafx.scene.input.MouseEvent;
-import org.dyn4j.collision.narrowphase.Raycast;
 import org.dyn4j.dynamics.RaycastResult;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Vector2;
 
-public class Game {
+public class Game implements BallsCollisionListener, BallPocketedListener, ObjectsRestListener {
     private final Renderer renderer;
     private final Physics physics;
+
+    private Vector2 cueStart;
+    private Vector2 cueEnd;
 
     public Game(Renderer renderer, Physics physics) {
         this.renderer = renderer;
@@ -30,32 +34,46 @@ public class Game {
         double pX = this.renderer.screenToPhysicsX(x);
         double pY = this.renderer.screenToPhysicsY(y);
 
-        Ray ray = new Ray(new Vector2(pX, pY), new Vector2(1,0));
+        cueStart.x = pX;
+        cueStart.y = pY;
+        this.renderer.setCueStart(x, y);
+        this.renderer.setCueEnd(x, y);
+        this.renderer.setCueCoordinatesPresent(true);
+    }
+
+    public void onMouseReleased(MouseEvent e) {
+        double x = e.getX();
+        double y = e.getY();
+
+        double pX = this.renderer.screenToPhysicsX(x);
+        double pY = this.renderer.screenToPhysicsY(y);
+
+        this.cueEnd.x = pX;
+        this.cueEnd.y = pY;
+
+        Vector2 direction = new Vector2(cueStart.x - cueEnd.x, cueStart.y - cueEnd.y);
+        Ray ray = new Ray(cueStart, direction);
         ArrayList<RaycastResult> results = new ArrayList<>();
         boolean result = this.physics.getWorld().raycast(ray, 1.0, false, false, results);
 
         if(result) {
-            System.out.println("We hit something");
-            if(results.get(0).getBody().getUserData() instanceof Ball)
-                results.get(0).getBody().applyForce(new Vector2(1, 0).multiply(750));
+            if(results.get(0).getBody().getUserData() instanceof Ball) {
+                results.get(0).getBody().applyForce(direction.multiply(750));
+            }
         }
 
-        this.renderer.setCueCoordinatesPresent(true);
-        this.renderer.setCueStart(x, y);
-    }
-
-    public void onMouseReleased(MouseEvent e) {
-        // When mouse is released create cue
-        this.renderer.createCue();
+        // When mouse is released cue is also released
+        cueStart.x = 0;
+        cueStart.y = 0;
+        cueEnd.x = 0;
+        cueEnd.y = 0;
+        this.renderer.releaseCue();
         this.renderer.setCueCoordinatesPresent(false);
     }
 
     public void setOnMouseDragged(MouseEvent e) {
         double x = e.getX();
         double y = e.getY();
-
-        double pX = renderer.screenToPhysicsX(x);
-        double pY = renderer.screenToPhysicsY(y);
 
         this.renderer.setCueEnd(x, y);
     }
@@ -109,5 +127,27 @@ public class Game {
         Table table = new Table();
         physics.getWorld().addBody(table.getBody());
         renderer.setTable(table);
+        this.cueStart = new Vector2();
+        this.cueEnd = new Vector2();
+    }
+
+    @Override
+    public void onBallsCollide(Ball b1, Ball b2) {
+
+    }
+
+    @Override
+    public boolean onBallPocketed(Ball b) {
+        return false;
+    }
+
+    @Override
+    public void onEndAllObjectsRest() {
+
+    }
+
+    @Override
+    public void onStartAllObjectsRest() {
+
     }
 }

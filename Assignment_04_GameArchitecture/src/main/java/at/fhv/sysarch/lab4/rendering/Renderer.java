@@ -52,10 +52,11 @@ public class Renderer extends AnimationTimer {
     private Physics physics;
 
     // Cue coordinates
-    private Optional<Double> cueStartX;
-    private Optional<Double> cueStartY;
-    private Optional<Double> cueEndX;
-    private Optional<Double> cueEndY;
+    private double cueStartX;
+    private double cueStartY;
+    private double cueEndX;
+    private double cueEndY;
+
     private boolean cueCoordinatesPresent = false;
 
     public Renderer(final GraphicsContext gc, 
@@ -82,6 +83,12 @@ public class Renderer extends AnimationTimer {
         this.jfxCoords = new Affine();
 
         this.gc.setStroke(Color.WHITE);
+
+        // Initialize cue coordinates
+        this.cueStartX = 0;
+        this.cueStartY = 0;
+        this.cueEndX = 0;
+        this.cueEndY = 0;
     }
 
     public void setStrikeMessage(String strikeMessage) {
@@ -243,25 +250,25 @@ public class Renderer extends AnimationTimer {
             this.gc.setTransform(this.jfxCoords);
             this.gc.setStroke(Color.BLACK);
             this.gc.setLineWidth(3);
-            this.gc.strokeLine(cueStartX.get(), cueStartY.get(), cueEndX.get(), cueEndY.get());
+            this.gc.strokeLine(cueStartX, cueStartY, cueEndX, cueEndY);
         }
     }
 
-    public void createCue() {
-        this.cueStartX = Optional.empty();
-        this.cueStartY = Optional.empty();
-        this.cueEndX = Optional.empty();
-        this.cueEndY = Optional.empty();
+    public void releaseCue() {
+        this.cueStartX = 0;
+        this.cueStartY = 0;
+        this.cueEndX = 0;
+        this.cueEndY = 0;
     }
 
     public void setCueStart(double x, double y) {
-        this.cueStartX = Optional.of(x);
-        this.cueStartY = Optional.of(y);
+        this.cueStartX = x;
+        this.cueStartY = y;
     }
 
     public void setCueEnd(double x, double y) {
-        this.cueEndX = Optional.of(x);
-        this.cueEndY = Optional.of(y);
+        this.cueEndX = x;
+        this.cueEndY = y;
     }
 
     public void setCueCoordinatesPresent(boolean cueCoordinatesPresent) {
