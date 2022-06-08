@@ -10,6 +10,7 @@ import at.fhv.sysarch.lab4.physics.ObjectsRestListener;
 import at.fhv.sysarch.lab4.physics.Physics;
 import at.fhv.sysarch.lab4.rendering.Renderer;
 import javafx.scene.input.MouseEvent;
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.RaycastResult;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Vector2;
@@ -24,6 +25,7 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
     public Game(Renderer renderer, Physics physics) {
         this.renderer = renderer;
         this.physics = physics;
+        this.physics.setBallPocketedListener(this);
         this.initWorld();
     }
 
@@ -58,7 +60,11 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
 
         if(result) {
             if(results.get(0).getBody().getUserData() instanceof Ball) {
-                results.get(0).getBody().applyForce(direction.multiply(750));
+                if (((Ball) results.get(0).getBody().getUserData()).isWhite()) {
+                    // Only apply force to white ball
+                    results.get(0).getBody().applyForce(direction.multiply(750));
+                }
+                // TODO: foul, switch player
             }
         }
 
@@ -138,6 +144,16 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
 
     @Override
     public boolean onBallPocketed(Ball b) {
+
+        if (b.isWhite()) {
+            // TODO: foul, switch player
+            resetWhiteBallPosition();
+        } else {
+            // TODO: points for currentPlayer
+            this.physics.getWorld().removeBody(b.getBody());
+            this.renderer.removeBall(b);
+        }
+
         return false;
     }
 
@@ -149,5 +165,16 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
     @Override
     public void onStartAllObjectsRest() {
 
+    }
+
+    private void resetWhiteBallPosition() {
+        physics.getWorld().removeBody(Ball.WHITE.getBody());
+        renderer.removeBall(Ball.WHITE);
+
+        Ball.WHITE.getBody().setLinearVelocity(0,0);
+        Ball.WHITE.setPosition(Table.Constants.WIDTH * 0.25, 0);
+
+        physics.getWorld().addBody(Ball.WHITE.getBody());
+        renderer.addBall(Ball.WHITE);
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import at.fhv.sysarch.lab4.physics.Physics;
+import javafx.scene.text.Font;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Polygon;
@@ -62,6 +63,7 @@ public class Renderer extends AnimationTimer {
     public Renderer(final GraphicsContext gc, 
         int sceneWidth, int sceneHeight, Physics physics) {
         this.gc = gc;
+        this.gc.setFont(Font.font("Comic Sans MS"));
         this.physics = physics;
         this.balls = new ArrayList<>();
         
