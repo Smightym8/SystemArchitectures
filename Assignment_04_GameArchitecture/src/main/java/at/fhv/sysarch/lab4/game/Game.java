@@ -36,6 +36,69 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
         this.initWorld();
     }
 
+    private void initWorld() {
+        List<Ball> balls = new ArrayList<>();
+
+        for (Ball b : Ball.values()) {
+            if (b == Ball.WHITE)
+                continue;
+
+            balls.add(b);
+        }
+
+        this.placeBalls(balls);
+
+        Ball.WHITE.setPosition(Table.Constants.WIDTH * 0.25, 0);
+        physics.getWorld().addBody(Ball.WHITE.getBody());
+        renderer.addBall(Ball.WHITE);
+
+        Table table = new Table();
+        physics.getWorld().addBody(table.getBody());
+        renderer.setTable(table);
+
+        this.physics.setBallPocketedListener(this);
+        this.physics.setBallsCollisionListener(this);
+        this.physics.setObjectsRestListener(this);
+
+        this.cueStart = new Vector2();
+        this.cueEnd = new Vector2();
+
+        this.playerOneScore = 0;
+        this.playerTwoScore = 0;
+        this.isPlayerOneTurn = true;
+        this.isFoulOccured = false;
+    }
+
+    private void placeBalls(List<Ball> balls) {
+        Collections.shuffle(balls);
+
+        // positioning the billard balls IN WORLD COORDINATES: meters
+        int row = 0;
+        int col = 0;
+        int colSize = 5;
+
+        double y0 = -2*Ball.Constants.RADIUS*2;
+        double x0 = -Table.Constants.WIDTH * 0.25 - Ball.Constants.RADIUS;
+
+        for (Ball b : balls) {
+            double y = y0 + (2 * Ball.Constants.RADIUS * row) + (col * Ball.Constants.RADIUS);
+            double x = x0 + (2 * Ball.Constants.RADIUS * col);
+
+            b.setPosition(x, y);
+            b.getBody().setLinearVelocity(0, 0);
+            renderer.addBall(b);
+            physics.getWorld().addBody(b.getBody());
+
+            row++;
+
+            if (row == colSize) {
+                row = 0;
+                col++;
+                colSize--;
+            }
+        }
+    }
+
     public void onMousePressed(MouseEvent e) {
         // Remove messages when next ball is being hit
         this.renderer.setFoulMessage("");
@@ -95,68 +158,6 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
         this.renderer.setCueEnd(x, y);
     }
 
-    private void placeBalls(List<Ball> balls) {
-        Collections.shuffle(balls);
-
-        // positioning the billard balls IN WORLD COORDINATES: meters
-        int row = 0;
-        int col = 0;
-        int colSize = 5;
-
-        double y0 = -2*Ball.Constants.RADIUS*2;
-        double x0 = -Table.Constants.WIDTH * 0.25 - Ball.Constants.RADIUS;
-
-        for (Ball b : balls) {
-            double y = y0 + (2 * Ball.Constants.RADIUS * row) + (col * Ball.Constants.RADIUS);
-            double x = x0 + (2 * Ball.Constants.RADIUS * col);
-
-            b.setPosition(x, y);
-            b.getBody().setLinearVelocity(0, 0);
-            renderer.addBall(b);
-            physics.getWorld().addBody(b.getBody());
-
-            row++;
-
-            if (row == colSize) {
-                row = 0;
-                col++;
-                colSize--;
-            }
-        }
-    }
-
-    private void initWorld() {
-        List<Ball> balls = new ArrayList<>();
-        
-        for (Ball b : Ball.values()) {
-            if (b == Ball.WHITE)
-                continue;
-
-            balls.add(b);
-        }
-       
-        this.placeBalls(balls);
-
-        Ball.WHITE.setPosition(Table.Constants.WIDTH * 0.25, 0);
-        physics.getWorld().addBody(Ball.WHITE.getBody());
-        renderer.addBall(Ball.WHITE);
-        
-        Table table = new Table();
-        physics.getWorld().addBody(table.getBody());
-        renderer.setTable(table);
-
-        this.physics.setBallPocketedListener(this);
-        this.physics.setBallsCollisionListener(this);
-        this.physics.setObjectsRestListener(this);
-
-        this.cueStart = new Vector2();
-        this.cueEnd = new Vector2();
-
-        this.playerOneScore = 0;
-        this.playerTwoScore = 0;
-        this.isPlayerOneTurn = true;
-        this.isFoulOccured = false;
-    }
 
     @Override
     public void onBallsCollide(Ball b1, Ball b2) {
@@ -174,6 +175,7 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
             this.physics.getWorld().removeBody(b.getBody());
             this.renderer.removeBall(b);
         }
+        updatePlayerScores();
 
         return false;
     }
@@ -190,15 +192,35 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
         this.renderer.setActionMessage(message);
     }
 
-    private void updatePlayerScores(int points) {
-        if(isPlayerOneTurn) {
-            playerOneScore += points;
+    private void updatePlayerScores() {
+        int points = 1;
+        if (!isFoulOccured) {
+            if(isPlayerOneTurn) {
+                playerOneScore += points;
+            } else {
+                playerTwoScore += points;
+            }
         } else {
-            playerTwoScore += points;
+            if(isPlayerOneTurn) {
+                playerOneScore -= points;
+            } else {
+                playerTwoScore -= points;
+            }
+            isFoulOccured = false;
         }
 
         this.renderer.setPlayer1Score(playerOneScore);
         this.renderer.setPlayer2Score(playerTwoScore);
+    }
+
+    private void changePlayer(boolean currentPlayerIsOne) {
+        if (currentPlayerIsOne) {
+            isPlayerOneTurn = false;
+            this.renderer.setActionMessage("Player 2 turn");
+        } else {
+            isPlayerOneTurn = true;
+            this.renderer.setActionMessage("Player 1 turn");
+        }
     }
 
     private void resetWhiteBallPosition() {
@@ -210,15 +232,5 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
 
         physics.getWorld().addBody(Ball.WHITE.getBody());
         renderer.addBall(Ball.WHITE);
-    }
-
-    private void changePlayer(boolean currentPlayerIsOne) {
-        if (currentPlayerIsOne) {
-            isPlayerOneTurn = false;
-            this.renderer.setActionMessage("Player 2 turn");
-        } else {
-            isPlayerOneTurn = true;
-            this.renderer.setActionMessage("Player 1 turn");
-        }
     }
 }
