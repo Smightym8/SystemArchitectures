@@ -22,14 +22,22 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
     private Vector2 cueStart;
     private Vector2 cueEnd;
 
+    private int playerOneScore;
+    private int playerTwoScore;
+    private boolean isPlayerOneTurn;
+
+    private boolean isFoulOccured;
+
     public Game(Renderer renderer, Physics physics) {
         this.renderer = renderer;
         this.physics = physics;
-        this.physics.setBallPocketedListener(this);
         this.initWorld();
     }
 
     public void onMousePressed(MouseEvent e) {
+        // Remove messages when next ball is being hit
+        this.renderer.setFoulMessage("");
+
         double x = e.getX();
         double y = e.getY();
 
@@ -60,13 +68,11 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
 
         if(result) {
             if(results.get(0).getBody().getUserData() instanceof Ball) {
-                if (((Ball) results.get(0).getBody().getUserData()).isWhite()) {
-                    // Only apply force to white ball
-                    results.get(0).getBody().applyForce(direction.multiply(750));
-                } else {
-                    // TODO: foul, switch player
-
+                if (!((Ball) results.get(0).getBody().getUserData()).isWhite()) {
+                    this.renderer.setFoulMessage("Wrong ball hit!");
+                    isFoulOccured = true;
                 }
+                results.get(0).getBody().applyForce(direction.multiply(700));
             }
         }
 
@@ -135,8 +141,18 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
         Table table = new Table();
         physics.getWorld().addBody(table.getBody());
         renderer.setTable(table);
+
+        this.physics.setBallPocketedListener(this);
+        this.physics.setBallsCollisionListener(this);
+        this.physics.setObjectsRestListener(this);
+
         this.cueStart = new Vector2();
         this.cueEnd = new Vector2();
+
+        this.playerOneScore = 0;
+        this.playerTwoScore = 0;
+        this.isPlayerOneTurn = true;
+        this.isFoulOccured = false;
     }
 
     @Override
@@ -146,12 +162,11 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
 
     @Override
     public boolean onBallPocketed(Ball b) {
-
         if (b.isWhite()) {
-            // TODO: foul, switch player
+            isFoulOccured = true;
+            this.renderer.setFoulMessage("Foul! White Ball pocketed!");
             resetWhiteBallPosition();
         } else {
-            // TODO: points for currentPlayer
             this.physics.getWorld().removeBody(b.getBody());
             this.renderer.removeBall(b);
         }
@@ -166,7 +181,20 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
 
     @Override
     public void onStartAllObjectsRest() {
+        String message = isPlayerOneTurn ? "Player 1 turn" : "Player 2 turn";
 
+        this.renderer.setActionMessage(message);
+    }
+
+    private void updatePlayerScores(int points) {
+        if(isPlayerOneTurn) {
+            playerOneScore += points;
+        } else {
+            playerTwoScore += points;
+        }
+
+        this.renderer.setPlayer1Score(playerOneScore);
+        this.renderer.setPlayer2Score(playerTwoScore);
     }
 
     private void resetWhiteBallPosition() {

@@ -14,15 +14,25 @@ public class Physics implements ContactListener, StepListener {
 
     private World world;
     private BallPocketedListener ballPocketedListener;
-
-    public void setBallPocketedListener(BallPocketedListener ballPocketedListener) {
-        this.ballPocketedListener = ballPocketedListener;
-    }
+    private BallsCollisionListener ballsCollisionListener;
+    private ObjectsRestListener objectsRestListener;
 
     public Physics() {
         this.world = new World();
         this.world.setGravity(World.ZERO_GRAVITY);
         this.world.addListener(this);
+    }
+
+    public void setBallPocketedListener(BallPocketedListener ballPocketedListener) {
+        this.ballPocketedListener = ballPocketedListener;
+    }
+
+    public void setBallsCollisionListener(BallsCollisionListener ballsCollisionListener) {
+        this.ballsCollisionListener = ballsCollisionListener;
+    }
+
+    public void setObjectsRestListener(ObjectsRestListener objectsRestListener) {
+        this.objectsRestListener = objectsRestListener;
     }
 
     public World getWorld() {
@@ -31,7 +41,7 @@ public class Physics implements ContactListener, StepListener {
 
     @Override
     public void begin(Step step, World world) {
-
+        
     }
 
     @Override
@@ -68,25 +78,13 @@ public class Physics implements ContactListener, StepListener {
     @Override
     public boolean persist(PersistedContactPoint point) {
         if (point.isSensor()) {
-            Body bodyOne = point.getBody1();
-            Body bodyTwo = point.getBody2();
-
-            Body pocket;
-            Body ball;
-
-            if (bodyOne.getUserData() instanceof Ball) {
-                ball = bodyOne;
-                pocket = bodyTwo;
-            } else {
-                ball = bodyTwo;
-                pocket = bodyOne;
-            }
+            Body ball = point.getBody1().getUserData() instanceof Ball ? point.getBody1() : point.getBody2();
+            Body pocket = point.getBody1().getUserData() instanceof Ball ? point.getBody2() : point.getBody1();
 
             if (pocket.contains(ball.getWorldCenter())) {
                 ballPocketedListener.onBallPocketed((Ball) ball.getUserData());
                 System.out.println("Ball -" + ball.getUserData() + "- contact with pocket");
             }
-
         }
         return true;
     }

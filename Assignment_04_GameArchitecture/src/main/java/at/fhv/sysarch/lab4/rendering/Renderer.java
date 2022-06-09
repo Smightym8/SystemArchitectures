@@ -250,8 +250,8 @@ public class Renderer extends AnimationTimer {
     private void drawCue() {
         if(cueCoordinatesPresent) {
             this.gc.setTransform(this.jfxCoords);
-            this.gc.setStroke(Color.BLACK);
-            this.gc.setLineWidth(3);
+            this.gc.setStroke(Color.SANDYBROWN);
+            this.gc.setLineWidth(7);
             this.gc.strokeLine(cueStartX, cueStartY, cueEndX, cueEndY);
         }
     }
