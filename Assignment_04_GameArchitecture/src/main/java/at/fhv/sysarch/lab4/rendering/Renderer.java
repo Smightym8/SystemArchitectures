@@ -1,25 +1,24 @@
 package at.fhv.sysarch.lab4.rendering;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import at.fhv.sysarch.lab4.game.Ball;
+import at.fhv.sysarch.lab4.game.Table;
+import at.fhv.sysarch.lab4.game.Table.TablePart;
 import at.fhv.sysarch.lab4.physics.Physics;
+import javafx.animation.AnimationTimer;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.ArcType;
 import javafx.scene.text.Font;
+import javafx.scene.transform.Affine;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
-import at.fhv.sysarch.lab4.game.Ball;
-import at.fhv.sysarch.lab4.game.Table;
-import at.fhv.sysarch.lab4.game.Table.TablePart;
-import javafx.animation.AnimationTimer;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.ArcType;
-import javafx.scene.transform.Affine;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class Renderer extends AnimationTimer {
     private long lastUpdate;

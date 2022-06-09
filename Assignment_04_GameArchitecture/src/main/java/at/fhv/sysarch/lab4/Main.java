@@ -7,6 +7,7 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -38,6 +39,7 @@ public class Main extends Application {
         root.getChildren().add(c);
         stage.setScene(s);
         stage.setTitle("Billiard Game");
+        stage.getIcons().add(new Image("billard.png"));
         stage.show();
 
         renderer.start();

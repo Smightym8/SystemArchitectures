@@ -1,15 +1,11 @@
 package at.fhv.sysarch.lab4.game;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.geometry.Circle;
-import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.MassType;
-import org.dyn4j.geometry.Polygon;
-import org.dyn4j.geometry.Vector2;
+import org.dyn4j.geometry.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Table {
     private final Body tableBody;

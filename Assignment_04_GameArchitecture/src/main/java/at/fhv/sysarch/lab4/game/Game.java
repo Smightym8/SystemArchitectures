@@ -1,19 +1,18 @@
 package at.fhv.sysarch.lab4.game;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import at.fhv.sysarch.lab4.physics.BallPocketedListener;
 import at.fhv.sysarch.lab4.physics.BallsCollisionListener;
 import at.fhv.sysarch.lab4.physics.ObjectsRestListener;
 import at.fhv.sysarch.lab4.physics.Physics;
 import at.fhv.sysarch.lab4.rendering.Renderer;
 import javafx.scene.input.MouseEvent;
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.RaycastResult;
 import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Vector2;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Game implements BallsCollisionListener, BallPocketedListener, ObjectsRestListener {
     private final Renderer renderer;

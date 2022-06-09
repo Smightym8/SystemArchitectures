@@ -1,11 +1,10 @@
 package at.fhv.sysarch.lab4.game;
 
+import javafx.scene.paint.Color;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
-
-import javafx.scene.paint.Color;
 
 public enum Ball {
     ONE(Color.YELLOW, true),
