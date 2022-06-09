@@ -41,7 +41,7 @@ public class Physics implements ContactListener, StepListener {
 
     @Override
     public void begin(Step step, World world) {
-        
+
     }
 
     @Override
@@ -56,7 +56,12 @@ public class Physics implements ContactListener, StepListener {
 
     @Override
     public void end(Step step, World world) {
+        double velocitySumX = world.getBodies().stream().mapToDouble(body -> body.getLinearVelocity().x).sum();
+        double velocitySumY = world.getBodies().stream().mapToDouble(body -> body.getLinearVelocity().y).sum();
 
+        if(velocitySumX == 0 && velocitySumY == 0) {
+            objectsRestListener.onEndAllObjectsRest();
+        }
     }
 
     @Override
@@ -71,7 +76,6 @@ public class Physics implements ContactListener, StepListener {
 
         if (bodyOne.getUserData() instanceof Ball && bodyTwo.getUserData() instanceof Ball) {
             ballsCollisionListener.onBallsCollide((Ball) bodyOne.getUserData(), (Ball) bodyTwo.getUserData());
-            System.out.println("Contact");
         }
         return true;
     }

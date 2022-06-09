@@ -19,6 +19,9 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
     private final Renderer renderer;
     private final Physics physics;
 
+    List<Ball> balls;
+    List<Ball> pocketedBalls;
+
     private Vector2 cueStart;
     private Vector2 cueEnd;
 
@@ -27,17 +30,21 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
     private boolean isPlayerOneTurn;
 
     private boolean isFoulOccured;
+    private boolean isBallShooted;
+    private boolean isWhiteBallPocketed;
+    private boolean isWhiteBallCollided;
+    private boolean switchPlayer;
 
     public Game(Renderer renderer, Physics physics) {
         this.renderer = renderer;
         this.physics = physics;
-        isPlayerOneTurn = true;
-        this.renderer.setActionMessage("Player 1 turn");
         this.initWorld();
+        this.initGameState();
     }
 
     private void initWorld() {
-        List<Ball> balls = new ArrayList<>();
+         balls = new ArrayList<>();
+         pocketedBalls = new ArrayList<>();
 
         for (Ball b : Ball.values()) {
             if (b == Ball.WHITE)
@@ -62,11 +69,18 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
 
         this.cueStart = new Vector2();
         this.cueEnd = new Vector2();
+    }
 
+    private void initGameState() {
         this.playerOneScore = 0;
         this.playerTwoScore = 0;
         this.isPlayerOneTurn = true;
         this.isFoulOccured = false;
+        this.isBallShooted = false;
+        this.isWhiteBallCollided = false;
+        this.switchPlayer = true;
+
+        updateStrikeMessage();
     }
 
     private void placeBalls(List<Ball> balls) {
@@ -100,68 +114,82 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
     }
 
     public void onMousePressed(MouseEvent e) {
-        // Remove messages when next ball is being hit
-        this.renderer.setFoulMessage("");
+        if(!isBallShooted) {
+            // Remove messages when next ball is being hit
+            this.renderer.setFoulMessage("");
 
-        double x = e.getX();
-        double y = e.getY();
+            double x = e.getX();
+            double y = e.getY();
 
-        double pX = this.renderer.screenToPhysicsX(x);
-        double pY = this.renderer.screenToPhysicsY(y);
+            double pX = this.renderer.screenToPhysicsX(x);
+            double pY = this.renderer.screenToPhysicsY(y);
 
-        cueStart.x = pX;
-        cueStart.y = pY;
-        this.renderer.setCueStart(x, y);
-        this.renderer.setCueEnd(x, y);
-        this.renderer.setCueCoordinatesPresent(true);
+            cueStart.x = pX;
+            cueStart.y = pY;
+            this.renderer.setCueStart(x, y);
+            this.renderer.setCueEnd(x, y);
+            this.renderer.setCueCoordinatesPresent(true);
+        }
     }
 
     public void onMouseReleased(MouseEvent e) {
-        double x = e.getX();
-        double y = e.getY();
+        if(!isBallShooted) {
+            double x = e.getX();
+            double y = e.getY();
 
-        double pX = this.renderer.screenToPhysicsX(x);
-        double pY = this.renderer.screenToPhysicsY(y);
+            double pX = this.renderer.screenToPhysicsX(x);
+            double pY = this.renderer.screenToPhysicsY(y);
 
-        this.cueEnd.x = pX;
-        this.cueEnd.y = pY;
+            this.cueEnd.x = pX;
+            this.cueEnd.y = pY;
 
-        Vector2 direction = new Vector2(cueStart.x - cueEnd.x, cueStart.y - cueEnd.y);
-        Ray ray = new Ray(cueStart, direction);
-        ArrayList<RaycastResult> results = new ArrayList<>();
-        boolean result = this.physics.getWorld().raycast(ray, 1.0, false, false, results);
+            Vector2 direction = new Vector2(cueStart.x - cueEnd.x, cueStart.y - cueEnd.y);
 
-        if(result) {
-            if(results.get(0).getBody().getUserData() instanceof Ball) {
-                if (!((Ball) results.get(0).getBody().getUserData()).isWhite()) {
-                    this.renderer.setFoulMessage("Wrong ball hit!");
-                    isFoulOccured = true;
-                    changePlayer(isPlayerOneTurn);
+            // TODO: Case if direction is zero
+
+            Ray ray = new Ray(cueStart, direction);
+            ArrayList<RaycastResult> results = new ArrayList<>();
+            boolean result = this.physics.getWorld().raycast(ray, 1.0, false, false, results);
+
+            if(result) {
+                if(results.get(0).getBody().getUserData() instanceof Ball) {
+
+                    if (!((Ball) results.get(0).getBody().getUserData()).isWhite()) {
+                        this.renderer.setFoulMessage("Wrong ball hit!");
+                        isFoulOccured = true;
+                    }
+                    this.renderer.setStrikeMessage("");
+                    this.renderer.setActionMessage("Balls are moving...");
+                    isBallShooted = true;
+                    // TODO: Calculate a good speed
+                    results.get(0).getBody().applyForce(direction.multiply(700));
                 }
-                results.get(0).getBody().applyForce(direction.multiply(700));
             }
-        }
 
-        // When mouse is released cue is also released
-        cueStart.x = 0;
-        cueStart.y = 0;
-        cueEnd.x = 0;
-        cueEnd.y = 0;
-        this.renderer.releaseCue();
-        this.renderer.setCueCoordinatesPresent(false);
+            // When mouse is released cue is also released
+            cueStart.x = 0;
+            cueStart.y = 0;
+            cueEnd.x = 0;
+            cueEnd.y = 0;
+            this.renderer.releaseCue();
+            this.renderer.setCueCoordinatesPresent(false);
+        }
     }
 
     public void setOnMouseDragged(MouseEvent e) {
-        double x = e.getX();
-        double y = e.getY();
+        if(!isBallShooted) {
+            double x = e.getX();
+            double y = e.getY();
 
-        this.renderer.setCueEnd(x, y);
+            this.renderer.setCueEnd(x, y);
+        }
     }
-
 
     @Override
     public void onBallsCollide(Ball b1, Ball b2) {
-
+        if(b1.isWhite() || b2.isWhite()) {
+            isWhiteBallCollided = true;
+        }
     }
 
     @Override
@@ -169,68 +197,100 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
         if (b.isWhite()) {
             isFoulOccured = true;
             this.renderer.setFoulMessage("Foul! White Ball pocketed!");
-            resetWhiteBallPosition();
-            changePlayer(isPlayerOneTurn);
+            isWhiteBallPocketed = true;
         } else {
-            this.physics.getWorld().removeBody(b.getBody());
-            this.renderer.removeBall(b);
+            switchPlayer = false;
+            updatePlayerScores(1);
+            pocketedBalls.add(b);
         }
-        updatePlayerScores();
+
+        this.physics.getWorld().removeBody(b.getBody());
+        this.renderer.removeBall(b);
 
         return false;
     }
 
     @Override
     public void onEndAllObjectsRest() {
+        if(isBallShooted) {
+            // TODO: Check that game ended and let it start again
+            if(balls.size() == pocketedBalls.size()) {
+                String winnerMessage = "Player One is the winner!";
 
+                if(playerTwoScore > playerOneScore) {
+                    winnerMessage = "Player Two is the winner!";
+                } else if (playerTwoScore == playerOneScore) {
+                    winnerMessage = "Draw!";
+                }
+
+                this.renderer.setActionMessage(winnerMessage);
+
+                placeBalls(this.balls);
+                resetWhiteBallPosition();
+                initGameState();
+            } else {
+                this.renderer.setActionMessage("");
+                isBallShooted = false;
+
+                if(!isWhiteBallCollided) {
+                    this.renderer.setFoulMessage("White ball didn't hit any other ball!");
+                    isFoulOccured = true;
+                }
+
+                if(isFoulOccured) {
+                    isFoulOccured = false;
+                    switchPlayer = true;
+                    updatePlayerScores(- 1);
+                }
+
+                if(isWhiteBallPocketed) {
+                    resetWhiteBallPosition();
+                    isWhiteBallPocketed = false;
+                }
+
+                if(switchPlayer) {
+                    changePlayer();
+                }
+
+                updateStrikeMessage();
+
+                switchPlayer = true;
+                isWhiteBallCollided = false;
+            }
+        }
     }
 
     @Override
     public void onStartAllObjectsRest() {
-        String message = isPlayerOneTurn ? "Player 1 turn" : "Player 2 turn";
 
-        this.renderer.setActionMessage(message);
     }
 
-    private void updatePlayerScores() {
-        int points = 1;
-        if (!isFoulOccured) {
-            if(isPlayerOneTurn) {
-                playerOneScore += points;
-            } else {
-                playerTwoScore += points;
-            }
+    private void updatePlayerScores(int points) {
+        if(isPlayerOneTurn) {
+            playerOneScore += points;
         } else {
-            if(isPlayerOneTurn) {
-                playerOneScore -= points;
-            } else {
-                playerTwoScore -= points;
-            }
-            isFoulOccured = false;
+            playerTwoScore += points;
         }
 
         this.renderer.setPlayer1Score(playerOneScore);
         this.renderer.setPlayer2Score(playerTwoScore);
     }
 
-    private void changePlayer(boolean currentPlayerIsOne) {
-        if (currentPlayerIsOne) {
-            isPlayerOneTurn = false;
-            this.renderer.setActionMessage("Player 2 turn");
-        } else {
-            isPlayerOneTurn = true;
-            this.renderer.setActionMessage("Player 1 turn");
-        }
+    private void changePlayer() {
+        isPlayerOneTurn = !isPlayerOneTurn;
+        this.renderer.setActionMessage("Switch player");
     }
 
     private void resetWhiteBallPosition() {
-        physics.getWorld().removeBody(Ball.WHITE.getBody());
-        renderer.removeBall(Ball.WHITE);
-
         Ball.WHITE.getBody().setLinearVelocity(0,0);
         Ball.WHITE.setPosition(Table.Constants.WIDTH * 0.25, 0);
 
         physics.getWorld().addBody(Ball.WHITE.getBody());
         renderer.addBall(Ball.WHITE);
+    }
+
+    private void updateStrikeMessage() {
+        String message = isPlayerOneTurn ? "Player 1 turn" : "Player 2 turn";
+        this.renderer.setStrikeMessage(message);
     }
 }

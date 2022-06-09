@@ -91,6 +91,7 @@ public class Renderer extends AnimationTimer {
         this.cueStartY = 0;
         this.cueEndX = 0;
         this.cueEndY = 0;
+
     }
 
     public void setStrikeMessage(String strikeMessage) {
