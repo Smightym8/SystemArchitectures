@@ -31,6 +31,8 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
     public Game(Renderer renderer, Physics physics) {
         this.renderer = renderer;
         this.physics = physics;
+        isPlayerOneTurn = true;
+        this.renderer.setActionMessage("Player 1 turn");
         this.initWorld();
     }
 
@@ -71,6 +73,7 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
                 if (!((Ball) results.get(0).getBody().getUserData()).isWhite()) {
                     this.renderer.setFoulMessage("Wrong ball hit!");
                     isFoulOccured = true;
+                    changePlayer(isPlayerOneTurn);
                 }
                 results.get(0).getBody().applyForce(direction.multiply(700));
             }
@@ -166,6 +169,7 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
             isFoulOccured = true;
             this.renderer.setFoulMessage("Foul! White Ball pocketed!");
             resetWhiteBallPosition();
+            changePlayer(isPlayerOneTurn);
         } else {
             this.physics.getWorld().removeBody(b.getBody());
             this.renderer.removeBall(b);
@@ -206,5 +210,15 @@ public class Game implements BallsCollisionListener, BallPocketedListener, Objec
 
         physics.getWorld().addBody(Ball.WHITE.getBody());
         renderer.addBall(Ball.WHITE);
+    }
+
+    private void changePlayer(boolean currentPlayerIsOne) {
+        if (currentPlayerIsOne) {
+            isPlayerOneTurn = false;
+            this.renderer.setActionMessage("Player 2 turn");
+        } else {
+            isPlayerOneTurn = true;
+            this.renderer.setActionMessage("Player 1 turn");
+        }
     }
 }

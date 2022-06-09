@@ -66,7 +66,13 @@ public class Physics implements ContactListener, StepListener {
 
     @Override
     public boolean begin(ContactPoint point) {
-        System.out.println("Contact");
+        Body bodyOne = point.getBody1();
+        Body bodyTwo = point.getBody2();
+
+        if (bodyOne.getUserData() instanceof Ball && bodyTwo.getUserData() instanceof Ball) {
+            ballsCollisionListener.onBallsCollide((Ball) bodyOne.getUserData(), (Ball) bodyTwo.getUserData());
+            System.out.println("Contact");
+        }
         return true;
     }
 

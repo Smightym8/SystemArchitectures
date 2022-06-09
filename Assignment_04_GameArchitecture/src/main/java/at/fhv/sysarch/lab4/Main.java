@@ -10,15 +10,17 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-public class Main extends Application {
-    private final static int SCENE_WIDTH  = 1920;
-    private final static int SCENE_HEIGHT = 1080;
+import java.awt.*;
 
+public class Main extends Application {
+    private final static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    private final static int SCENE_WIDTH  = screenSize.width;
+    private final static int SCENE_HEIGHT = screenSize.height;
     @Override
     public void start(Stage stage) {
         final Group root = new Group();
         final Scene s = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT, Color.BURLYWOOD);
-        final Canvas c = new Canvas(SCENE_WIDTH, SCENE_WIDTH);
+        final Canvas c = new Canvas(SCENE_WIDTH, SCENE_HEIGHT);
 
         Physics physics = new Physics();
 
